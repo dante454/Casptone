@@ -335,3 +335,4 @@ camiones = [camion1, camion2, camion3]
 x_minutos = 1  # Por ejemplo, los camiones pueden salir cada 30 minutos
 simular_minuto_a_minuto(simulacion, camiones, x_minutos)
 
+crear_gif_con_movimiento_camiones(simulacion)

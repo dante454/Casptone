@@ -273,3 +273,5 @@ camion3 = Camion(id=3, tiempo_inicial=0)
 camiones = [camion1, camion2, camion3]
 
 simular_minuto_a_minuto(simulacion, camiones, 1)
+
+crear_gif_con_movimiento_camiones(simulacion)

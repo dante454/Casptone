@@ -7,8 +7,24 @@ def euclidean_distance(p1, p2):
     return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
 # Algoritmo de Cheapest Insertion corregido
-def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles, tiempo_limite=180):
-    # Filtrar los pedidos válidos (dentro del tiempo límite de 180 minutos)
+def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=180):
+    """
+    Algoritmo de Cheapest Insertion modificado para manejar prioridades y rechazar "Pick-ups" y "Deliveries" de forma simplificada.
+    """
+
+    # 1. Calcular las prioridades de los pedidos
+    def calcular_prioridad(pedido):
+        if pedido.indicador == 0:  # Delivery
+            tiempo_restante = (pedido.minuto_llegada - minuto_actual) * -1
+            return tiempo_restante  # Prioridad más alta cuando el tiempo restante es bajo
+        else:  # Pick-up
+            tiempo_transcurrido = minuto_actual - 520  # Desde el inicio de la simulación
+            return max(0, tiempo_transcurrido)  # Prioridad más alta a medida que el día avanza
+
+    # 2. Ordenar los pedidos por prioridad (de mayor a menor)
+    pedidos_disponibles = sorted(pedidos_disponibles, key=calcular_prioridad, reverse=True)
+
+    # Filtrar los pedidos válidos (dentro del tiempo límite)
     pedidos_validos = [
         pedido for pedido in pedidos_disponibles
         if minuto_actual - pedido.minuto_llegada <= tiempo_limite
@@ -17,36 +33,32 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
     if not pedidos_validos:
         return [depot, depot]  # No hay pedidos válidos
 
-    n = len(pedidos_validos)
+    # Inicializar la ruta desde el depot
+    route = [0]  # '0' representa el depósito
 
-    # Inicializa la ruta desde el depot
-    route = [0]  # Usamos '0' para representar el depósito
-
-    # Encuentra el pedido más cercano al depot para comenzar la ruta
+    # 3. Encontrar el pedido más cercano al depot para comenzar la ruta
     min_dist = float('inf')
     next_point = None
-    for i in range(n):
-        dist = euclidean_distance(depot, pedidos_validos[i].coordenadas)
+    for i, pedido in enumerate(pedidos_validos):
+        dist = euclidean_distance(depot, pedido.coordenadas)
         if dist < min_dist:
             min_dist = dist
             next_point = i
 
-    # Añade el índice del pedido más cercano a la ruta
+    # Añadir el pedido más cercano a la ruta
     route.append(next_point)
+    unvisited = set(range(len(pedidos_validos))) - {next_point}  # Puntos no visitados
 
-    # Crea un conjunto con los puntos no visitados
-    unvisited = set(range(n)) - {next_point}
-
-    # Proceso de inserción con restricciones horarias
+    # 4. Proceso de inserción con prioridades y rechazo inteligente
     while unvisited:
         min_increase = float('inf')
         best_position = None
         best_point = None
 
-        # Busca el punto no visitado que se puede insertar con el menor incremento de distancia
+        # Buscar el mejor punto para insertar con el menor incremento de distancia
         for point in unvisited:
             for i in range(1, len(route)):
-                # Calcula el incremento de distancia
+                # 4.1 Calcular el incremento de distancia si se inserta el punto
                 current_dist = euclidean_distance(
                     pedidos_validos[route[i]].coordenadas, 
                     pedidos_validos[route[i - 1]].coordenadas
@@ -57,26 +69,35 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
                 )
                 increase = new_dist - current_dist
 
-                # Construir la ruta temporal incluyendo el nuevo punto
-                ruta_temporal_sin_dep = [depot] + [pedidos_validos[j].coordenadas for j in route[:i]] + \
-                                [pedidos_validos[point].coordenadas] + [pedidos_validos[j].coordenadas for j in route[i:]]
+                # 4.2 Criterio de rechazo para "Pick-ups" usando la prioridad
+                if (pedidos_validos[point].indicador == 1 and  # Solo aplicar a "Pick-ups"
+                    increase > parametros["max_aumento_distancia"] * (minuto_actual / parametros["tiempo_necesario_pick_up"]) and 
+                    minuto_actual < parametros["tiempo_necesario_pick_up"]):
+                    print("Se rechaza Pick Up")
+                    continue  # Rechazar el Pick-up
+
+                # 4.3 Criterio de rechazo simplificado para "Deliveries"
+                if (pedidos_validos[point].indicador == 0 and  # Solo aplicar a "Deliveries"
+                    (calcular_prioridad(pedidos_validos[point]) > parametros["tiempo_restante_max"] and  # Queda mucho tiempo
+                    increase > parametros["max_aumento_distancia_delivery"])):  # Incremento de distancia es demasiado grande
+                    print("Se rechaza deliverie")
+                    continue  # Rechazar el Delivery
+                # 4.4 Construir la ruta temporal y calcular el tiempo de llegada al nuevo punto
                 ruta_temporal = [depot] + [pedidos_validos[j].coordenadas for j in route[:i]] + \
                                 [pedidos_validos[point].coordenadas] + [pedidos_validos[j].coordenadas for j in route[i:]] + \
                                 [depot]
-
-                # Calcular el tiempo total para llegar al nuevo punto
                 tiempo_total = calcular_tiempo_ruta(ruta_temporal, camion.velocidad)
-                tiempo_al_punto = calcular_tiempo_ruta(ruta_temporal_sin_dep, camion.velocidad)
-                tiempo_llegada_punto = minuto_actual + tiempo_al_punto
+                tiempo_llegada_punto = minuto_actual + tiempo_total
 
                 # Verificar si el camión puede llegar a tiempo al nuevo punto
                 pedido = pedidos_validos[point]
-                if (increase < min_increase and
-                    tiempo_llegada_punto <= pedido.minuto_llegada + tiempo_limite and
+                if (tiempo_llegada_punto <= pedido.minuto_llegada + tiempo_limite and
                     verificar_llegada_a_tiempo(camion, ruta_temporal, minuto_actual)):
-                    min_increase = increase
-                    best_position = i
-                    best_point = point
+                    # Elegir este punto si el incremento de distancia es el menor
+                    if increase < min_increase:
+                        min_increase = increase
+                        best_position = i
+                        best_point = point
 
         # Si no se encuentra una inserción válida, termina el proceso
         if best_position is None or best_point is None:
@@ -86,10 +107,10 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
         route.insert(best_position, best_point)
         unvisited.remove(best_point)  # Marca el punto como visitado
 
-    # Añade el depot al final de la ruta
+    # Añadir el depot al final de la ruta
     route.append(0)
 
-    # Retorna la ruta con las coordenadas de los puntos
+    # Retornar la ruta con las coordenadas de los puntos
     return [depot] + [pedidos_validos[i].coordenadas for i in route if i != 0] + [depot]
 
 # Función para verificar si el camión puede completar la ruta a tiempo
@@ -170,8 +191,8 @@ def graficar_rutas(ruta_cheapest, distancia_cheapest, ruta_3opt, distancia_3opt)
     plt.axis('equal')  # Para que los ejes sean de la misma escala
     plt.show()
 
-def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, tiempo_limite=180):
-    ruta = cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles, tiempo_limite=180)  # Pasa la ubicación del depot
+def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=180):
+    ruta = cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=180)  # Pasa la ubicación del depot
     #ruta = two_opt(ruta)
     ruta = three_opt(ruta)
 
@@ -180,3 +201,10 @@ def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, tiem
 def calcular_tiempo_regreso(velocidad, distancia):
     tiempo = distancia / velocidad
     return tiempo
+
+
+def vence_el_pedido(pedido, tiempo_llegada_punto, tiempo_limite):
+    if pedido.indicador == 0:
+        if (tiempo_llegada_punto <= pedido.minuto_llegada + tiempo_limite):
+            return False
+    return True

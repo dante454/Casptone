@@ -140,7 +140,6 @@ def filtrar_pedidos_vencidos(pedidos_disponibles, minuto_actual, tiempo_limite=1
     pedidos_validos = [pedido for pedido in pedidos_disponibles if minuto_actual - pedido.minuto_llegada <= tiempo_limite]
     return pedidos_validos
 
-
 def separar_y_seleccionar_area(pedidos_disponibles):
     # Separar los pedidos según su área
     pedidos_area1 = [pedido for pedido in pedidos_disponibles if pedido.area == 1]
@@ -177,8 +176,24 @@ def flujo_ruteo(camion, simulacion):
     pedidos_a_rutear = separar_y_seleccionar_area(pedidos_disponibles)
 
     depot=[10000, 10000]
+
+    parametros = {
+    "min_pedidos_salida": 10,
+    "porcentaje_reduccion_distancia": 50,
+    "max_puntos_eliminados": 15,
+    "tiempo_maximo_entrega": 180,
+    "x_minutos": 30,
+    "limite_area1": 120,  # Primer ángulo límite (en grados)
+    "limite_area2": 240,  # Segundo ángulo límite (en grados)
+    "peso_min_pedidos": 1.0,
+    "peso_ventana_tiempo": 1.0,
+    "umbral_salida": 1.5,
+    "tiempo_minimo_pickup": 30,  # Ejemplo: 30 minutos desde la llegada del Pick-up
+    "max_aumento_distancia": 500, 
+    "prioridad_necesaria": 0
+}
     # 4. Generar la ruta según los pedidos en el área con más pedidos
-    ruta = generar_ruta(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear, tiempo_limite=180)
+    ruta = generar_ruta(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear,parametros, tiempo_limite=180)
 
     # tiempo_maximo = 1020  # Tiempo máximo en minutos (17:00 PM)
     # while True:
@@ -225,17 +240,12 @@ def asignar_area(punto):
     else:
         return 3  # Área 3
 
-    
-
 # Función para verificar si se alcanza a completar la ruta en el tiempo disponible
 def verificar_llegada_a_tiempo(camion, ruta, minuto_actual):
     tiempo_total = calcular_tiempo_ruta(ruta, camion.velocidad)
     if minuto_actual + tiempo_total > 1020:  # Verifica si se pasa de las 7 PM (1110 minutos)
         return False
     return True
-
-
-
 
 # Función para actualizar el estado de la simulación, marcando los puntos de la ruta como visitados
 def actualizar_estado_simulacion(simulacion, ruta):
@@ -248,8 +258,6 @@ def actualizar_estado_simulacion(simulacion, ruta):
                 # Mover el pedido a la lista de pedidos entregados
                 simulacion.pedidos_disponibles.remove(pedido)
                 simulacion.pedidos_entregados.append(pedido)
-                
-
 
 def simular_minuto_a_minuto(simulacion, camiones, x_minutos):
     # Inicia la simulación desde las 8:30 AM (minuto 630) hasta las 7:00 PM (1110 minutos)
@@ -446,80 +454,6 @@ camiones = [camion1, camion2, camion3]
 # Ejecutar la simulación con los camiones
 x_minutos = 1  # Por ejemplo, los camiones pueden salir cada 30 minutos
 simular_minuto_a_minuto(simulacion, camiones, x_minutos)
-
-def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimiento_camiones.gif"):
-    fig, ax = plt.subplots(figsize=(10, 10))
-    ax.set_xlim(0, 20000)
-    ax.set_ylim(0, 20000)
-
-    # Colores para cada camión
-    colores_camiones = ["cyan", "magenta", "orange"]
-    velocidad_camion = 35 * 1000 / 60  # 35 km/h convertidos a metros por minuto
-
-    # Función para calcular la posición actual del camión
-    def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad):
-        distancia_recorrida = tiempo_transcurrido * velocidad
-        distancia_acumulada = 0
-
-        for i in range(1, len(ruta)):
-            distancia_segmento = calcular_distancia(ruta[i-1], ruta[i])
-            if distancia_acumulada + distancia_segmento >= distancia_recorrida:
-                # Interpolar entre los puntos
-                fraccion = (distancia_recorrida - distancia_acumulada) / distancia_segmento
-                x = ruta[i-1][0] + fraccion * (ruta[i][0] - ruta[i-1][0])
-                y = ruta[i-1][1] + fraccion * (ruta[i][1] - ruta[i-1][1])
-                return (x, y)
-            distancia_acumulada += distancia_segmento
-
-        # Si ha recorrido toda la ruta, devolver el último punto
-        return ruta[-1]
-
-    # Función para actualizar cada cuadro de la animación
-    def actualizar(frame):
-        ax.clear()
-        ax.set_xlim(0, 20000)
-        ax.set_ylim(0, 20000)
-        ax.set_title(f"Minuto {simulacion.registro_minuto_a_minuto[frame]['minuto']}")
-        ax.scatter(10000, 10000, c="black", s=50, label="Depósito")  # Depósito en negro
-
-        estado = simulacion.registro_minuto_a_minuto[frame]
-
-        # Graficar pedidos
-        for pedido in estado["pedidos"]:
-            x, y = pedido["coordenadas"]
-            if pedido["entregado"]:
-                ax.plot(x, y, 'go')  # Pedido entregado en verde
-            elif pedido["estado"] == "Disponible":
-                if estado["minuto"] - pedido["minuto_llegada"] > 180:  # Pedidos vencidos
-                    ax.plot(x, y, 'mo')  # Pedido vencido en magenta
-                else:
-                    ax.plot(x, y, 'bo')  # Pedido disponible en azul
-            else:
-                ax.plot(x, y, 'ro')  # Pedido no disponible en rojo
-
-        # Graficar camiones y sus rutas
-        for i, camion in enumerate(estado["camiones"]):
-            if camion["rutas_realizadas"] > 0:
-                ruta = camion["ruta_actual"]
-                tiempo_transcurrido = estado["minuto"] - camion["tiempo_inicio_ruta"]
-                posicion_actual = calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad_camion)
-
-                # Graficar la ruta completa del camión en su color asignado
-                ruta_x = [punto[0] for punto in ruta]
-                ruta_y = [punto[1] for punto in ruta]
-                ax.plot(ruta_x, ruta_y, '--', color=colores_camiones[i], alpha=0.3)  # Ruta en línea discontinua con transparencia
-
-                # Graficar la posición actual del camión en su color asignado
-                ax.scatter(posicion_actual[0], posicion_actual[1], c=colores_camiones[i], s=70, label=f"Camión {camion['id']}")
-
-        ax.legend()
-
-    # Crear la animación
-    anim = animation.FuncAnimation(fig, actualizar, frames=len(simulacion.registro_minuto_a_minuto), interval=100)
-    
-    # Guardar el GIF
-    anim.save(archivo_gif, writer="pillow")
-    print(f"GIF creado: {archivo_gif}")
 
 # Llamar a la función para crear el GIF
 crear_gif_con_movimiento_camiones(simulacion)
