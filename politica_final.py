@@ -159,8 +159,8 @@ def simular_minuto_a_minuto(simulacion, camiones, x_minutos):
     for a in simulacion.beneficio_por_intervalo:
         print(a)
     print(valor for valor in simulacion.beneficio_por_intervalo)
-    graficar_rutas_y_puntos(camiones, simulacion)
-    graficar_beneficio(simulacion)
+   # graficar_rutas_y_puntos(camiones, simulacion)
+    #graficar_beneficio(simulacion)
 
 def graficar_beneficio(simulacion):
     intervalos = [x[0] for x in simulacion.beneficio_por_intervalo]
@@ -255,11 +255,11 @@ parametros = {
 }
 
 # Cargar los datos de la simulación desde archivos pickle
-with open('Instancia Tipo III/scen_points_sample.pkl', 'rb') as f:
+with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
     points = pickle.load(f)[0]  # Seleccionar la primera simulación para este ejemplo
-with open('Instancia Tipo III/scen_arrivals_sample.pkl', 'rb') as f:
+with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
     llegadas = pickle.load(f)[0]
-with open('Instancia Tipo III/scen_indicador_sample.pkl', 'rb') as f:
+with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
     indicadores = pickle.load(f)[0]
 
 arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]

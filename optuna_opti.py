@@ -7,12 +7,12 @@ import pandas as pd
 
 def objetivo(trial):
     # Define los hiperparámetros a ajustar
-    tiempo_maximo_entrega = trial.suggest_int("tiempo_maximo_entrega", 120, 300)
+    tiempo_maximo_entrega = trial.suggest_int("tiempo_maximo_entrega", 180, 180)
     umbral_salida = trial.suggest_float("umbral_salida", 0.5, 2.0)
     peso_min_pedidos = trial.suggest_float("peso_min_pedidos", 0.1, 3.0)
     peso_ventana_tiempo = trial.suggest_float("peso_ventana_tiempo", 0.1, 3.0)
-    min_pedidos_salida = trial.suggest_int("min_pedidos_salida", 1, 20)
-    x_minutos = trial.suggest_int("x_minutos", 10, 60)  # Añade este parámetro
+    min_pedidos_salida = trial.suggest_int("min_pedidos_salida", 0, 50)
+    x_minutos = trial.suggest_int("x_minutos", 1, 200)  # Añade este parámetro
 
     # Actualiza los parámetros en la simulación
     parametros = {
@@ -35,7 +35,8 @@ def objetivo(trial):
     simular_minuto_a_minuto(simulacion, camiones, parametros)
 
     # Calcula el beneficio total obtenido
-    beneficio_total = simulacion.calcular_beneficio_acumulado()
+    benef_acumulado = simulacion.calcular_beneficio_acumulado()
+    beneficio_total = simulacion.calcular_porcentaje_beneficio(benef_acumulado)
     
     return beneficio_total
 
@@ -44,7 +45,7 @@ def objetivo(trial):
 
 # Crear un estudio de Optuna para maximizar el beneficio
 estudio = optuna.create_study(direction="maximize")
-estudio.optimize(objetivo, n_trials=10)  # n_trials es el número de iteraciones
+estudio.optimize(objetivo, n_trials=100)  # n_trials es el número de iteraciones
 
 # Muestra los mejores parámetros encontrados
 print("Mejores parámetros:", estudio.best_params)
