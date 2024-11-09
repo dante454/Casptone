@@ -45,7 +45,7 @@ def objetivo(trial):
 
 # Crear un estudio de Optuna para maximizar el beneficio
 estudio = optuna.create_study(direction="maximize")
-estudio.optimize(objetivo, n_trials=100)  # n_trials es el número de iteraciones
+estudio.optimize(objetivo, n_trials=200)  # n_trials es el número de iteraciones
 
 # Muestra los mejores parámetros encontrados
 print("Mejores parámetros:", estudio.best_params)

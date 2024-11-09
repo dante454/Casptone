@@ -130,7 +130,7 @@ class Camion:
         self.tiempo_restante = tiempo_ruta
         self.tiempo_inicio_ruta = tiempo_inicio  # Registrar el tiempo de inicio de la ruta
         print(f"Camión {self.id} asignado a una nueva ruta, tiempo de ruta: {tiempo_ruta} minutos")
-
+        
 
 
 def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimiento_camiones.gif"):
@@ -140,7 +140,7 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
 
     # Colores para cada camión
     colores_camiones = ["cyan", "magenta", "orange"]
-    velocidad_camion = 35 * 1000 / 60  # 35 km/h convertidos a metros por minuto
+    velocidad_camion = ((25 * 1000) / 60)  # 35 km/h convertidos a metros por minuto
 
     # Función para calcular la posición actual del camión
     def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad):
@@ -275,7 +275,7 @@ def calcular_distancia(punto1, punto2):
 # Función placeholder para calcular el tiempo de la ruta
 def calcular_tiempo_ruta(ruta, velocidad_camion):
     distancia_total = calcular_distancia_ruta(ruta)
-    tiempo_extra = len(ruta) * 5 #5 minutos en entregar cada pedido
+    tiempo_extra = (len(ruta) - 2) * 5 #5 minutos en entregar cada pedido
     return ((distancia_total / velocidad_camion)  + tiempo_extra)# Tiempo en minutos
 
 
