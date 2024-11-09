@@ -5,6 +5,134 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+class EstadoSimulacion:
+    def __init__(self, minuto_inicial, puntos, indicadores, arribos_por_minuto):
+        self.minuto_actual = minuto_inicial
+        self.pedidos_no_disponibles = []
+        self.pedidos_disponibles = []
+        self.pedidos_entregados = []
+        self.puntos = puntos
+        self.indicadores = indicadores
+        self.arribos_por_minuto = arribos_por_minuto
+        self.punto_index = 0 # Para mantener el control sobre los puntos que vamos usand
+        self.beneficio_por_intervalo = [] 
+        self.registro_minuto_a_minuto = []
+
+
+    def avanzar_minuto(self):
+        self.minuto_actual += 1
+        self.revisar_pedidos_disponibles()
+
+        # Crear nuevos pedidos según arribos_por_minuto
+        if self.minuto_actual in self.arribos_por_minuto:
+            cantidad_pedidos = self.arribos_por_minuto[self.minuto_actual]
+            for _ in range(cantidad_pedidos):
+                # Crear pedidos a partir de los puntos e indicadores
+                nuevo_pedido = Pedido(self.puntos[self.punto_index], self.indicadores[self.punto_index], self.minuto_actual)
+                self.pedidos_no_disponibles.append(nuevo_pedido)
+                self.punto_index += 1  # Avanzar al siguiente punto
+
+    def revisar_pedidos_disponibles(self):
+        for pedido in self.pedidos_no_disponibles[:]:
+            pedido.hacer_disponible(self.minuto_actual)
+            if pedido.disponible == 1 and pedido.entregado == 0:
+                self.pedidos_no_disponibles.remove(pedido)
+                self.pedidos_disponibles.append(pedido)
+
+    def calcular_beneficio_acumulado(self):
+        """Calcula el beneficio acumulado desde el inicio de la simulación."""
+        return sum(
+            1 if pedido.indicador == 1 else 2 
+            for pedido in self.pedidos_entregados
+        )
+
+    def calcular_beneficio_maximo(self):
+        """Calcula el beneficio máximo posible hasta el minuto actual."""
+        return sum(
+            1 if pedido.indicador == 1 else 2 
+            for pedido in (self.pedidos_entregados + self.pedidos_disponibles + self.pedidos_no_disponibles)
+        )
+
+    def calcular_porcentaje_beneficio(self, beneficio_acumulado):
+        """Calcula el porcentaje del beneficio respecto al máximo beneficio disponible."""
+        beneficio_maximo = self.calcular_beneficio_maximo()
+        if beneficio_maximo == 0:
+            return 0  # Evita división por cero
+        return (beneficio_acumulado / beneficio_maximo) * 100
+    
+    def registrar_estado(self, camiones):
+        # Capturar el estado actual de los pedidos y camiones
+        estado = {
+            "minuto": self.minuto_actual,
+            "pedidos": [
+                {
+                    "coordenadas": pedido.coordenadas,
+                    "tipo": "Delivery" if pedido.indicador == 0 else "Pick-up",
+                    "estado": "Disponible" if pedido.disponible else "No Disponible",
+                    "entregado": pedido.entregado,
+                    "minuto_llegada": pedido.minuto_llegada
+                } for pedido in self.pedidos_no_disponibles + self.pedidos_disponibles + self.pedidos_entregados
+            ],
+            "camiones": [
+                {
+                    "id": camion.id,
+                    "tiempo_restante": camion.tiempo_restante,
+                    "rutas_realizadas": len(camion.rutas),
+                    "ruta_actual": camion.rutas[-1] if camion.rutas else [],
+                    "tiempo_inicio_ruta": camion.tiempo_inicio_ruta  # Incluir tiempo de inicio de la ruta
+                } for camion in camiones
+            ]
+        }
+        # Agregar el estado actual a la lista de registros
+        self.registro_minuto_a_minuto.append(estado)
+
+class Pedido:
+    def __init__(self, coordenadas, indicador, minuto_llegada):
+        self.coordenadas = coordenadas
+        self.indicador = indicador  # 0: Delivery, 1: Pick-up
+        self.minuto_llegada = minuto_llegada
+        self.disponible = 0  # 0: No disponible, 1: Disponible (tras 15 min)
+        self.entregado = 0  # 0: No entregado, 1: Entregado
+        self.tiempo_entrega = None  # Tiempo de entrega (minuto_llegada - minuto_entrega)
+        self.momento_entrega = None
+        self.area = self.determinar_area()  # Atributo que indica el área del pedido
+
+    def hacer_disponible(self, minuto_actual):
+        if minuto_actual >= self.minuto_llegada + 15:
+            self.disponible = 1
+            
+
+    def entregar(self, minuto_entrega):
+        self.entregado = 1
+        self.tiempo_entrega = minuto_entrega - self.minuto_llegada
+        self.momento_entrega = minuto_entrega
+        self.disponible = 0  # Ya no está disponible porque fue entregado
+
+    def determinar_area(self):
+        return asignar_area(self.coordenadas)
+
+class Camion:
+    def __init__(self, id, tiempo_inicial):
+        self.id = id
+        self.tiempo_restante = tiempo_inicial  # Minutos hasta que el camión esté disponible
+        self.velocidad = ((25 * 1000) / 60) #metro/minuto
+        self.rutas = []  # Almacena todas las rutas realizadas por el camión
+        self.tiempo_inicio_ruta = None
+
+    def actualizar_tiempo(self):
+        if self.tiempo_restante > 1:
+            self.tiempo_restante -= 1
+        else:
+            self.tiempo_restante = 0
+
+    def asignar_ruta(self, ruta, tiempo_ruta, tiempo_inicio):
+        self.rutas.append(ruta)  # Agregar la ruta realizada a la lista de rutas
+        self.tiempo_restante = tiempo_ruta
+        self.tiempo_inicio_ruta = tiempo_inicio  # Registrar el tiempo de inicio de la ruta
+        print(f"Camión {self.id} asignado a una nueva ruta, tiempo de ruta: {tiempo_ruta} minutos")
+
+
+
 def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimiento_camiones.gif"):
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_xlim(0, 20000)
@@ -260,128 +388,3 @@ def asignar_area(punto):
     
 
 
-class EstadoSimulacion:
-    def __init__(self, minuto_inicial, puntos, indicadores, arribos_por_minuto):
-        self.minuto_actual = minuto_inicial
-        self.pedidos_no_disponibles = []
-        self.pedidos_disponibles = []
-        self.pedidos_entregados = []
-        self.puntos = puntos
-        self.indicadores = indicadores
-        self.arribos_por_minuto = arribos_por_minuto
-        self.punto_index = 0 # Para mantener el control sobre los puntos que vamos usand
-        self.beneficio_por_intervalo = [] 
-        self.registro_minuto_a_minuto = []
-
-
-    def avanzar_minuto(self):
-        self.minuto_actual += 1
-        self.revisar_pedidos_disponibles()
-
-        # Crear nuevos pedidos según arribos_por_minuto
-        if self.minuto_actual in self.arribos_por_minuto:
-            cantidad_pedidos = self.arribos_por_minuto[self.minuto_actual]
-            for _ in range(cantidad_pedidos):
-                # Crear pedidos a partir de los puntos e indicadores
-                nuevo_pedido = Pedido(self.puntos[self.punto_index], self.indicadores[self.punto_index], self.minuto_actual)
-                self.pedidos_no_disponibles.append(nuevo_pedido)
-                self.punto_index += 1  # Avanzar al siguiente punto
-
-    def revisar_pedidos_disponibles(self):
-        for pedido in self.pedidos_no_disponibles[:]:
-            pedido.hacer_disponible(self.minuto_actual)
-            if pedido.disponible == 1 and pedido.entregado == 0:
-                self.pedidos_no_disponibles.remove(pedido)
-                self.pedidos_disponibles.append(pedido)
-
-    def calcular_beneficio_acumulado(self):
-        """Calcula el beneficio acumulado desde el inicio de la simulación."""
-        return sum(
-            1 if pedido.indicador == 1 else 2 
-            for pedido in self.pedidos_entregados
-        )
-
-    def calcular_beneficio_maximo(self):
-        """Calcula el beneficio máximo posible hasta el minuto actual."""
-        return sum(
-            1 if pedido.indicador == 1 else 2 
-            for pedido in (self.pedidos_entregados + self.pedidos_disponibles + self.pedidos_no_disponibles)
-        )
-
-    def calcular_porcentaje_beneficio(self, beneficio_acumulado):
-        """Calcula el porcentaje del beneficio respecto al máximo beneficio disponible."""
-        beneficio_maximo = self.calcular_beneficio_maximo()
-        if beneficio_maximo == 0:
-            return 0  # Evita división por cero
-        return (beneficio_acumulado / beneficio_maximo) * 100
-    
-    def registrar_estado(self, camiones):
-        # Capturar el estado actual de los pedidos y camiones
-        estado = {
-            "minuto": self.minuto_actual,
-            "pedidos": [
-                {
-                    "coordenadas": pedido.coordenadas,
-                    "tipo": "Delivery" if pedido.indicador == 0 else "Pick-up",
-                    "estado": "Disponible" if pedido.disponible else "No Disponible",
-                    "entregado": pedido.entregado,
-                    "minuto_llegada": pedido.minuto_llegada
-                } for pedido in self.pedidos_no_disponibles + self.pedidos_disponibles + self.pedidos_entregados
-            ],
-            "camiones": [
-                {
-                    "id": camion.id,
-                    "tiempo_restante": camion.tiempo_restante,
-                    "rutas_realizadas": len(camion.rutas),
-                    "ruta_actual": camion.rutas[-1] if camion.rutas else [],
-                    "tiempo_inicio_ruta": camion.tiempo_inicio_ruta  # Incluir tiempo de inicio de la ruta
-                } for camion in camiones
-            ]
-        }
-        # Agregar el estado actual a la lista de registros
-        self.registro_minuto_a_minuto.append(estado)
-
-class Pedido:
-    def __init__(self, coordenadas, indicador, minuto_llegada):
-        self.coordenadas = coordenadas
-        self.indicador = indicador  # 0: Delivery, 1: Pick-up
-        self.minuto_llegada = minuto_llegada
-        self.disponible = 0  # 0: No disponible, 1: Disponible (tras 15 min)
-        self.entregado = 0  # 0: No entregado, 1: Entregado
-        self.tiempo_entrega = None  # Tiempo de entrega (minuto_llegada - minuto_entrega)
-        self.momento_entrega = None
-        self.area = self.determinar_area()  # Atributo que indica el área del pedido
-
-    def hacer_disponible(self, minuto_actual):
-        if minuto_actual >= self.minuto_llegada + 15:
-            self.disponible = 1
-            
-
-    def entregar(self, minuto_entrega):
-        self.entregado = 1
-        self.tiempo_entrega = minuto_entrega - self.minuto_llegada
-        self.momento_entrega = minuto_entrega
-        self.disponible = 0  # Ya no está disponible porque fue entregado
-
-    def determinar_area(self):
-        return asignar_area(self.coordenadas)
-
-class Camion:
-    def __init__(self, id, tiempo_inicial):
-        self.id = id
-        self.tiempo_restante = tiempo_inicial  # Minutos hasta que el camión esté disponible
-        self.velocidad = 583
-        self.rutas = []  # Almacena todas las rutas realizadas por el camión
-        self.tiempo_inicio_ruta = None
-
-    def actualizar_tiempo(self):
-        if self.tiempo_restante > 1:
-            self.tiempo_restante -= 1
-        else:
-            self.tiempo_restante = 0
-
-    def asignar_ruta(self, ruta, tiempo_ruta, tiempo_inicio):
-        self.rutas.append(ruta)  # Agregar la ruta realizada a la lista de rutas
-        self.tiempo_restante = tiempo_ruta
-        self.tiempo_inicio_ruta = tiempo_inicio  # Registrar el tiempo de inicio de la ruta
-        print(f"Camión {self.id} asignado a una nueva ruta, tiempo de ruta: {tiempo_ruta} minutos")
