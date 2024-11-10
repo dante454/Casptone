@@ -36,7 +36,7 @@ def verificar_tiempo_ruta(camion, ruta, minuto_actual, tiempo_maximo, velocidad)
     return True, None
 
 
-def flujo_ruteo(camion, simulacion):
+def flujo_ruteo(camion, simulacion, parametros):
     # 1. Obtener los pedidos disponibles
     pedidos_disponibles = simulacion.pedidos_disponibles
 
@@ -92,12 +92,18 @@ def actualizar_estado_simulacion(simulacion, ruta):
                 simulacion.pedidos_disponibles.remove(pedido)
                 simulacion.pedidos_entregados.append(pedido)
 
-def simular_minuto_a_minuto(simulacion, camiones, x_minutos):
+def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3):
     # Inicia la simulación desde las 8:30 AM (minuto 630) hasta las 7:00 PM (1110 minutos)
     for minuto in range(520, 1020):
         simulacion.minuto_actual = minuto
         print(f"Minuto {minuto}: simulando...")
 
+        if minuto <= 650:
+            parametros = parametros_ventana_1
+        elif 651 <= minuto <= 780:
+            parametros = parametros_ventana_2
+        else:
+            parametros = parametros_ventana_3
         # Actualizar los pedidos disponibles minuto a minuto
         simulacion.revisar_pedidos_disponibles()
 
@@ -108,9 +114,9 @@ def simular_minuto_a_minuto(simulacion, camiones, x_minutos):
             
         # Evaluar si los camiones deben salir a rutear
         for camion in camiones:
-            if evaluar_salida(camion, simulacion, x_minutos):
+            if evaluar_salida(camion, simulacion, parametros):
                 # Gestionar el camión cuando sale a realizar una ruta
-                flujo_ruteo(camion, simulacion)
+                flujo_ruteo(camion, simulacion, parametros)
         
         # Cada 30 minutos, calcular el porcentaje de beneficio captado
         if minuto % 30 == 0:
@@ -157,8 +163,8 @@ def simular_minuto_a_minuto(simulacion, camiones, x_minutos):
 
     print()
    
-    graficar_rutas_y_puntos(camiones, simulacion)
-    graficar_beneficio(simulacion)
+    #graficar_rutas_y_puntos(camiones, simulacion)
+    #graficar_beneficio(simulacion)
 
 def graficar_beneficio(simulacion):
     intervalos = [x[0] for x in simulacion.beneficio_por_intervalo]
@@ -234,7 +240,43 @@ def eliminar_puntos_si_reducen_distancia(ruta, simulacion, x_porcentaje=50, y_ma
     return ruta
 
 # Parámetros de la simulación (ajustables por Optuna)
-parametros = {
+parametros_ventana_1 = {
+    "min_pedidos_salida": 10,
+    "porcentaje_reduccion_distancia": 50,
+    "max_puntos_eliminados": 15,
+    "tiempo_maximo_entrega": 180,
+    "x_minutos": 30,
+    "limite_area1": 120,  # Primer ángulo límite (en grados)
+    "limite_area2": 240,  # Segundo ángulo límite (en grados)
+    "peso_min_pedidos": 1.0,
+    "peso_ventana_tiempo": 1.0,
+    "umbral_salida": 1.5,
+    "tiempo_minimo_pickup": 30,  # Ejemplo: 30 minutos desde la llegada del Pick-up
+    "max_aumento_distancia": 10, 
+    "tiempo_necesario_pick_up": 1200,
+    "tiempo_restante_max": 150,
+    "max_aumento_distancia_delivery": 100,
+}
+
+parametros_ventana_2 = {
+    "min_pedidos_salida": 10,
+    "porcentaje_reduccion_distancia": 50,
+    "max_puntos_eliminados": 15,
+    "tiempo_maximo_entrega": 180,
+    "x_minutos": 30,
+    "limite_area1": 120,  # Primer ángulo límite (en grados)
+    "limite_area2": 240,  # Segundo ángulo límite (en grados)
+    "peso_min_pedidos": 1.0,
+    "peso_ventana_tiempo": 1.0,
+    "umbral_salida": 1.5,
+    "tiempo_minimo_pickup": 30,  # Ejemplo: 30 minutos desde la llegada del Pick-up
+    "max_aumento_distancia": 10, 
+    "tiempo_necesario_pick_up": 1200,
+    "tiempo_restante_max": 150,
+    "max_aumento_distancia_delivery": 100,
+}
+
+parametros_ventana_3 = {
     "min_pedidos_salida": 10,
     "porcentaje_reduccion_distancia": 50,
     "max_puntos_eliminados": 15,
@@ -270,6 +312,7 @@ camiones = [
     Camion(id=3, tiempo_inicial=0)
 ]
 
-simular_minuto_a_minuto(simulacion, camiones, parametros)
+simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
+
 # Llamar a la función para crear el GIF
-crear_gif_con_movimiento_camiones(simulacion)
+#crear_gif_con_movimiento_camiones(simulacion)
