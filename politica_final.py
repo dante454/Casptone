@@ -82,15 +82,23 @@ def asignar_area(punto, parametros):
 
 # Función para actualizar el estado de la simulación, marcando los puntos de la ruta como visitados
 def actualizar_estado_simulacion(simulacion, ruta):
+    # Lista para almacenar los pedidos que se entregarán
+    pedidos_a_entregar = []
+
     # Para cada punto en la ruta, buscar el pedido correspondiente en pedidos disponibles
     for punto in ruta:
-        for pedido in simulacion.pedidos_disponibles:
-            if np.array_equal(pedido.coordenadas, punto):
-                # Cambiar el estado del pedido a entregado
-                pedido.entregar(simulacion.minuto_actual)
-                # Mover el pedido a la lista de pedidos entregados
-                simulacion.pedidos_disponibles.remove(pedido)
-                simulacion.pedidos_entregados.append(pedido)
+        pedidos_en_punto = [pedido for pedido in simulacion.pedidos_disponibles if np.array_equal(pedido.coordenadas, punto)]
+        pedidos_a_entregar.extend(pedidos_en_punto)
+
+    # Actualizar el estado de los pedidos y las listas de la simulación
+    for pedido in pedidos_a_entregar:
+        # Cambiar el estado del pedido a entregado
+        pedido.entregar(simulacion.minuto_actual)
+        # Mover el pedido a la lista de pedidos entregados
+        simulacion.pedidos_entregados.append(pedido)
+
+    # Remover los pedidos entregados de la lista de pedidos disponibles
+    simulacion.pedidos_disponibles = [pedido for pedido in simulacion.pedidos_disponibles if pedido not in pedidos_a_entregar]
 
 def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3):
     # Inicia la simulación desde las 8:30 AM (minuto 630) hasta las 7:00 PM (1110 minutos)
@@ -163,8 +171,8 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
 
     print()
    
-    #graficar_rutas_y_puntos(camiones, simulacion)
-    #graficar_beneficio(simulacion)
+    graficar_rutas_y_puntos(camiones, simulacion)
+    graficar_beneficio(simulacion)
 
 def graficar_beneficio(simulacion):
     intervalos = [x[0] for x in simulacion.beneficio_por_intervalo]
@@ -315,4 +323,4 @@ camiones = [
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
 # Llamar a la función para crear el GIF
-#crear_gif_con_movimiento_camiones(simulacion)
+crear_gif_con_movimiento_camiones(simulacion)
