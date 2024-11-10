@@ -1,3 +1,6 @@
+#    IMPORTANTE
+#Para correr este archivo es necesario comentar la linea 166, 167 y 318 del archivo politica_final
+
 import optuna
 from funciones_caso_base import EstadoSimulacion, Camion, procesar_tiempos, calcular_tiempo_ruta
 from politica_final import simular_minuto_a_minuto, points, indicadores, arribos_por_minuto

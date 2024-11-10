@@ -310,7 +310,7 @@ def calcular_beneficio(simulacion):
     porcentaje_recuperado = (beneficio / beneficio_maximo) * 100 if beneficio_maximo > 0 else 0
 
     print(f"Beneficio total: {beneficio}, Beneficio máximo: {beneficio_maximo}, \nPorcentaje recuperado: {porcentaje_recuperado:.2f}%")
-    return beneficio, porcentaje_recuperado
+    return porcentaje_recuperado
 
 def calcular_distancia_total(camiones):
     distancia_total = 0
