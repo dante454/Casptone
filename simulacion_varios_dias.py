@@ -1,3 +1,8 @@
+
+#    ------------------- IMPORTANTE  --------------------
+#Para correr este archivo es necesario comentar la linea 166, 167 y 318 del archivo politica_final
+
+
 import pickle
 import pandas as pd
 from funciones_caso_base import *
@@ -26,11 +31,11 @@ parametros_ventana_2 = parametros_ventana_1.copy()  # Puedes ajustar los valores
 parametros_ventana_3 = parametros_ventana_1.copy()
 
 # Cargar los datos de la simulación para los 100 días
-with open('Instancia Tipo III/scen_points_sample.pkl', 'rb') as f:
+with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
     puntos_simulaciones = pickle.load(f)
-with open('Instancia Tipo III/scen_arrivals_sample.pkl', 'rb') as f:
+with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
     llegadas_simulaciones = pickle.load(f)
-with open('Instancia Tipo III/scen_indicador_sample.pkl', 'rb') as f:
+with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
     indicadores_simulaciones = pickle.load(f)
 
 # Inicializar listas para almacenar los resultados de los KPIs

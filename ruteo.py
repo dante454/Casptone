@@ -57,7 +57,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
             return max(0, tiempo_transcurrido)
 
     # Ordenar pedidos por prioridad
-    pedidos_disponibles = sorted(pedidos_disponibles, key=calcular_prioridad, reverse=True)
+    pedidos_disponibles = sorted(pedidos_disponibles, key=calcular_prioridad, reverse=False)
     # Filtrar pedidos válidos dentro del tiempo límite de vencimiento
     pedidos_validos = [pedido for pedido in pedidos_disponibles if minuto_actual - pedido.minuto_llegada <= tiempo_limite]
 

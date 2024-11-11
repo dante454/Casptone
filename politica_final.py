@@ -171,8 +171,8 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
 
     print()
    
-    graficar_rutas_y_puntos(camiones, simulacion)
-    graficar_beneficio(simulacion)
+    #graficar_rutas_y_puntos(camiones, simulacion)
+    #graficar_beneficio(simulacion)
 
 def graficar_beneficio(simulacion):
     intervalos = [x[0] for x in simulacion.beneficio_por_intervalo]
@@ -323,4 +323,4 @@ camiones = [
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
 # Llamar a la función para crear el GIF
-crear_gif_con_movimiento_camiones(simulacion)
+#crear_gif_con_movimiento_camiones(simulacion)
