@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 from funciones_caso_base import *
 
 # Función para calcular la distancia euclidiana entre dos puntos
-def euclidean_distance(p1, p2):
-    return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+
+def manhattan_distance(p1, p2):
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
 # Algoritmo de Cheapest Insertion corregido
 def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=180):
@@ -14,7 +15,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
     """
 
     # Función para calcular los tiempos de llegada a cada punto en una ruta
-    def calculate_arrival_times(ruta_indices, pedidos_validos, depot, camion_velocidad, minuto_actual, service_time=5):
+    def calculate_arrival_times(ruta_indices, pedidos_validos, depot, camion_velocidad, minuto_actual, service_time=3):
         arrival_times = []
         current_time = minuto_actual
         current_location = depot
@@ -25,7 +26,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
             next_location = pedido.coordenadas
 
             # Calcular el tiempo de viaje al siguiente punto
-            distance = euclidean_distance(current_location, next_location)
+            distance = manhattan_distance(current_location, next_location)
             travel_time = distance / camion_velocidad
 
             # Tiempo de llegada al siguiente punto
@@ -41,7 +42,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
             current_location = next_location
 
         # Finalmente, regresar al depósito
-        distance = euclidean_distance(current_location, depot)
+        distance = manhattan_distance(current_location, depot)
         travel_time = distance / camion_velocidad
         current_time += travel_time  # Sumar tiempo para regresar al depósito
 
@@ -71,7 +72,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
     min_dist = float('inf')
     first_point = None
     for i, pedido in enumerate(pedidos_validos):
-        dist = euclidean_distance(depot, pedido.coordenadas)
+        dist = manhattan_distance(depot, pedido.coordenadas)
         if dist < min_dist:
             min_dist = dist
             first_point = i
@@ -81,7 +82,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
     unvisited = set(range(len(pedidos_validos))) - {first_point}
 
     # Calcular los tiempos de llegada y tiempo total de la ruta inicial
-    arrival_times, tiempo_total = calculate_arrival_times(route, pedidos_validos, depot, camion.velocidad, minuto_actual, service_time=5)
+    arrival_times, tiempo_total = calculate_arrival_times(route, pedidos_validos, depot, camion.velocidad, minuto_actual, service_time=3)
 
     # Verificar que podemos llegar al primer punto antes de que venza
     pedido = pedidos_validos[first_point]
@@ -111,7 +112,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
 
                 # Calcular los tiempos de llegada y el tiempo total de la ruta temporal
                 arrival_times_temp, total_time_temp = calculate_arrival_times(
-                    ruta_temporal, pedidos_validos, depot, camion.velocidad, minuto_actual, service_time=5
+                    ruta_temporal, pedidos_validos, depot, camion.velocidad, minuto_actual, service_time=3
                 )
 
                 # Verificar si la ruta temporal cumple con el horizonte de tiempo
@@ -182,7 +183,7 @@ def verificar_llegada_a_tiempo(camion, ruta, minuto_actual):
 def total_distance(route):
     dist = 0
     for i in range(len(route) - 1):
-        dist += euclidean_distance(route[i], route[i + 1])
+        dist += manhattan_distance(route[i], route[i + 1])
     return dist
 
 
@@ -266,3 +267,100 @@ def vence_el_pedido(pedido, tiempo_llegada_punto, tiempo_limite):
         if (tiempo_llegada_punto <= pedido.minuto_llegada + tiempo_limite):
             return False
     return True
+
+
+def cheapest_insertion_caso_base(points, depot, camion, minuto_actual, pedidos_disponibles, tiempo_limite=180):
+    """
+    Algoritmo de Cheapest Insertion para el caso base, sin ordenamiento de prioridad
+    y sin rechazo de "Pick-ups" y "Deliveries".
+
+    - No se permite recoger pedidos vencidos.
+    - El camión debe regresar antes del minuto 1020.
+    """
+
+    def calculate_arrival_times(ruta_indices, pedidos_validos, depot, camion_velocidad, minuto_actual, service_time=3):
+        arrival_times = []
+        current_time = minuto_actual
+        current_location = depot
+
+        for idx in ruta_indices:
+            pedido = pedidos_validos[idx]
+            next_location = pedido.coordenadas
+            distance = manhattan_distance(current_location, next_location)
+            travel_time = distance / camion_velocidad
+            arrival_time = current_time + travel_time
+            current_time = arrival_time + service_time
+            arrival_times.append(arrival_time)
+            current_location = next_location
+
+        distance = manhattan_distance(current_location, depot)
+        travel_time = distance / camion_velocidad
+        current_time += travel_time
+        return arrival_times, current_time
+
+    pedidos_validos = [pedido for pedido in pedidos_disponibles if minuto_actual - pedido.minuto_llegada <= tiempo_limite]
+    if not pedidos_validos:
+        return [depot, depot]
+
+    route = []
+    min_dist = float('inf')
+    first_point = None
+    for i, pedido in enumerate(pedidos_validos):
+        dist = manhattan_distance(depot, pedido.coordenadas)
+        if dist < min_dist:
+            min_dist = dist
+            first_point = i
+
+    route.append(first_point)
+    unvisited = set(range(len(pedidos_validos))) - {first_point}
+    arrival_times, tiempo_total = calculate_arrival_times(route, pedidos_validos, depot, camion.velocidad, minuto_actual, service_time=3)
+
+    pedido = pedidos_validos[first_point]
+    expiration_time = pedido.minuto_llegada + tiempo_limite
+    if arrival_times[0] > expiration_time or tiempo_total > 1020:
+        return [depot, depot]
+
+    while unvisited:
+        min_increase = float('inf')
+        best_position = None
+        best_point = None
+
+        for point in unvisited:
+            for i in range(len(route) + 1):
+                ruta_temporal = route.copy()
+                ruta_temporal.insert(i, point)
+                arrival_times_temp, total_time_temp = calculate_arrival_times(ruta_temporal, pedidos_validos, depot, camion.velocidad, minuto_actual, service_time=5)
+
+                if total_time_temp > 1020:
+                    continue
+
+                all_points_valid = True
+                for idx_ruta, arrival_time in zip(ruta_temporal, arrival_times_temp):
+                    pedido_ruta = pedidos_validos[idx_ruta]
+                    expiration_time_ruta = pedido_ruta.minuto_llegada + tiempo_limite
+                    if arrival_time > expiration_time_ruta:
+                        all_points_valid = False
+                        break
+
+                if not all_points_valid:
+                    continue
+
+                increase = total_time_temp - tiempo_total
+
+                if increase < min_increase:
+                    min_increase = increase
+                    best_position = i
+                    best_point = point
+                    best_total_time = total_time_temp
+                    best_arrival_times = arrival_times_temp
+
+        if best_point is not None:
+            route.insert(best_position, best_point)
+            unvisited.remove(best_point)
+            tiempo_total = best_total_time
+            arrival_times = best_arrival_times
+        else:
+            break
+
+    ruta_final_coords = [depot] + [pedidos_validos[idx].coordenadas for idx in route] + [depot]
+    return ruta_final_coords

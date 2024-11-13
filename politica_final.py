@@ -1,10 +1,9 @@
 import numpy as np
 from ruteo import generar_ruta
 import pickle
-import pandas as pd
 import matplotlib.pyplot as plt
 from funciones_caso_base import *
-import matplotlib.animation as animation
+
 
 #Pasos a implementar forma inteligente y con un parametro modificable de priorizar los deliveries con los pick ups
 #Forma inteligente de incertar un pick up a una ruta en movimiento
@@ -28,14 +27,6 @@ def separar_y_seleccionar_area(pedidos_disponibles):
         return pedidos_area3
 
 
-def verificar_tiempo_ruta(camion, ruta, minuto_actual, tiempo_maximo, velocidad):
-    for i, punto in enumerate(ruta[:-1]):  # Iteramos sobre todos los puntos menos el último (el depósito)
-        tiempo_necesario = calcular_tiempo_ruta(ruta[:i+1], velocidad)
-        if minuto_actual + tiempo_necesario > tiempo_maximo:
-            return False, punto  # Devolvemos el punto que no se puede entregar a tiempo
-    return True, None
-
-
 def flujo_ruteo(camion, simulacion, parametros):
     # 1. Obtener los pedidos disponibles
     pedidos_disponibles = simulacion.pedidos_disponibles
@@ -47,8 +38,6 @@ def flujo_ruteo(camion, simulacion, parametros):
     # 4. Generar la ruta según los pedidos en el área con más pedidos
     ruta = generar_ruta(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, tiempo_limite=180)
 
-    # 6. Aplicar la nueva política para eliminar puntos si reducen al menos x% la distancia
-    #ruta = eliminar_puntos_si_reducen_distancia(ruta, simulacion)
 
     # 7. Actualizar los pedidos entregados
     actualizar_estado_simulacion(simulacion, ruta)
@@ -171,8 +160,8 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
 
     print()
    
-    #graficar_rutas_y_puntos(camiones, simulacion)
-    #graficar_beneficio(simulacion)
+    graficar_rutas_y_puntos(camiones, simulacion)
+    graficar_beneficio(simulacion)
 
 def graficar_beneficio(simulacion):
     intervalos = [x[0] for x in simulacion.beneficio_por_intervalo]
@@ -247,68 +236,42 @@ def eliminar_puntos_si_reducen_distancia(ruta, simulacion, x_porcentaje=50, y_ma
 
     return ruta
 
+def registrar_tiempos_delivery(simulacion, camiones):
+    # Lista para almacenar los datos de cada delivery (momento de aparición y recogida)
+    registros_delivery = []
+
+    # Iterar sobre todos los camiones y sus rutas
+    for camion in camiones:
+        for pedido in simulacion.pedidos_entregados:
+            if pedido.indicador == 0:  # Identificar los pedidos de delivery
+                registro = {
+                    "momento_aparicion": pedido.minuto_llegada,
+                    "momento_recogida": pedido.tiempo_entrega
+                }
+                registros_delivery.append(registro)
+
+    # Convertir a DataFrame
+    df_registros = pd.DataFrame(registros_delivery)
+
+    # Guardar en un archivo CSV
+    output_path = "registros_delivery.csv"
+    df_registros.to_csv(output_path, index=False)
+    print(f"Archivo guardado en {output_path}")
+
+
+
 # Parámetros de la simulación (ajustables por Optuna)
-parametros_ventana_1 = {
-    "min_pedidos_salida": 10,
-    "porcentaje_reduccion_distancia": 50,
-    "max_puntos_eliminados": 15,
-    "tiempo_maximo_entrega": 180,
-    "x_minutos": 30,
-    "limite_area1": 120,  # Primer ángulo límite (en grados)
-    "limite_area2": 240,  # Segundo ángulo límite (en grados)
-    "peso_min_pedidos": 1.0,
-    "peso_ventana_tiempo": 1.0,
-    "umbral_salida": 1.5,
-    "tiempo_minimo_pickup": 30,  # Ejemplo: 30 minutos desde la llegada del Pick-up
-    "max_aumento_distancia": 10, 
-    "tiempo_necesario_pick_up": 1200,
-    "tiempo_restante_max": 150,
-    "max_aumento_distancia_delivery": 100,
-}
-
-parametros_ventana_2 = {
-    "min_pedidos_salida": 10,
-    "porcentaje_reduccion_distancia": 50,
-    "max_puntos_eliminados": 15,
-    "tiempo_maximo_entrega": 180,
-    "x_minutos": 30,
-    "limite_area1": 120,  # Primer ángulo límite (en grados)
-    "limite_area2": 240,  # Segundo ángulo límite (en grados)
-    "peso_min_pedidos": 1.0,
-    "peso_ventana_tiempo": 1.0,
-    "umbral_salida": 1.5,
-    "tiempo_minimo_pickup": 30,  # Ejemplo: 30 minutos desde la llegada del Pick-up
-    "max_aumento_distancia": 10, 
-    "tiempo_necesario_pick_up": 1200,
-    "tiempo_restante_max": 150,
-    "max_aumento_distancia_delivery": 100,
-}
-
-parametros_ventana_3 = {
-    "min_pedidos_salida": 10,
-    "porcentaje_reduccion_distancia": 50,
-    "max_puntos_eliminados": 15,
-    "tiempo_maximo_entrega": 180,
-    "x_minutos": 30,
-    "limite_area1": 120,  # Primer ángulo límite (en grados)
-    "limite_area2": 240,  # Segundo ángulo límite (en grados)
-    "peso_min_pedidos": 1.0,
-    "peso_ventana_tiempo": 1.0,
-    "umbral_salida": 1.5,
-    "tiempo_minimo_pickup": 30,  # Ejemplo: 30 minutos desde la llegada del Pick-up
-    "max_aumento_distancia": 10, 
-    "tiempo_necesario_pick_up": 1200,
-    "tiempo_restante_max": 150,
-    "max_aumento_distancia_delivery": 100,
-}
+parametros_ventana_1 = {'min_pedidos_salida': 6, 'porcentaje_reduccion_distancia': 48, 'max_puntos_eliminados': 7, 'x_minutos': 14, 'limite_area1': 99, 'limite_area2': 219, 'peso_min_pedidos': 0.5053907930602788, 'peso_ventana_tiempo': 1.26559812361353, 'umbral_salida': 1.7215286984662614, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1000, 'tiempo_restante_max': 169, 'max_aumento_distancia_delivery': 71}
+parametros_ventana_2 = {'min_pedidos_salida': 6, 'porcentaje_reduccion_distancia': 38, 'max_puntos_eliminados': 15, 'x_minutos': 15, 'limite_area1': 145, 'limite_area2': 185, 'peso_min_pedidos': 0.5036249735873504, 'peso_ventana_tiempo': 0.6160401293905916, 'umbral_salida': 1.1596366169682866, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 17, 'tiempo_necesario_pick_up': 1137, 'tiempo_restante_max': 107, 'max_aumento_distancia_delivery': 78}
+parametros_ventana_3 = {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 6, 'x_minutos': 56, 'limite_area1': 112, 'limite_area2': 230, 'peso_min_pedidos': 1.5749264915561263, 'peso_ventana_tiempo': 1.9963865650894679, 'umbral_salida': 1.4696212191447602, 'tiempo_minimo_pickup': 23, 'max_aumento_distancia': 5, 'tiempo_necesario_pick_up': 1050, 'tiempo_restante_max': 109, 'max_aumento_distancia_delivery': 75}
 
 # Cargar los datos de la simulación desde archivos pickle
 with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
-    points = pickle.load(f)[0]  # Seleccionar la primera simulación para este ejemplo
+    points = pickle.load(f)[18]  # Seleccionar la primera simulación para este ejemplo
 with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
-    llegadas = pickle.load(f)[0]
+    llegadas = pickle.load(f)[18]
 with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
-    indicadores = pickle.load(f)[0]
+    indicadores = pickle.load(f)[18]
 
 arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]
 simulacion = EstadoSimulacion(minuto_inicial=520, puntos=points, indicadores=indicadores, arribos_por_minuto=arribos_por_minuto)
@@ -322,5 +285,7 @@ camiones = [
 
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
+registrar_tiempos_delivery(simulacion, camiones)
+
 # Llamar a la función para crear el GIF
-#crear_gif_con_movimiento_camiones(simulacion)
+crear_gif_con_movimiento_camiones(simulacion)

@@ -1,5 +1,6 @@
-#    IMPORTANTE
+#    ------------------- ¡¡¡¡ IMPORTANTE !!!!!!--------------------
 #Para correr este archivo es necesario comentar la linea 166, 167 y 318 del archivo politica_final
+
 
 import optuna
 from funciones_caso_base import EstadoSimulacion, Camion, procesar_tiempos, calcular_tiempo_ruta
@@ -100,6 +101,14 @@ mejor_beneficio = estudio.best_value
 mejores_parametros_ventana_1 = {k.replace('_1', ''): v for k, v in mejores_parametros.items() if '_1' in k}
 mejores_parametros_ventana_2 = {k.replace('_2', ''): v for k, v in mejores_parametros.items() if '_2' in k}
 mejores_parametros_ventana_3 = {k.replace('_3', ''): v for k, v in mejores_parametros.items() if '_3' in k}
+
+print()
+print(mejores_parametros_ventana_1)
+print()
+print(mejores_parametros_ventana_2)
+print()
+print(mejores_parametros_ventana_3)
+print()
 
 # Convertir los mejores parámetros a un DataFrame para una visualización más organizada
 df_mejores_parametros = pd.DataFrame(mejores_parametros.items(), columns=["Parámetro", "Valor"])
