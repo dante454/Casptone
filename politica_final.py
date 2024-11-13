@@ -73,6 +73,7 @@ def asignar_area(punto, parametros):
 def actualizar_estado_simulacion(simulacion, ruta):
     # Lista para almacenar los pedidos que se entregarán
     pedidos_a_entregar = []
+    puntos_sin_pedidos = []
 
     # Para cada punto en la ruta, buscar el pedido correspondiente en pedidos disponibles
     for punto in ruta:
@@ -160,8 +161,8 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
 
     print()
    
-    graficar_rutas_y_puntos(camiones, simulacion)
-    graficar_beneficio(simulacion)
+    #graficar_rutas_y_puntos(camiones, simulacion)
+    #graficar_beneficio(simulacion)
 
 def graficar_beneficio(simulacion):
     intervalos = [x[0] for x in simulacion.beneficio_por_intervalo]
@@ -195,46 +196,6 @@ def evaluar_salida(camion, simulacion, parametros):
     # Verifica si el valor ponderado supera el umbral
     return valor_ponderado >= parametros["umbral_salida"]
 
-# Función para gestionar la salida de los camiones
-def gestionar_salida_camion(camion, simulacion):
-    # Imprimir información del camión y el minuto actual
-    print(f"Gestionando la salida del camión {camion.id} en el minuto {simulacion.minuto_actual}")
-
-    # Llamar al flujo de ruteo para asignar una ruta al camión
-    ruta, tiempo_ruta = flujo_ruteo(camion, simulacion)
-
-    # Asignar la ruta generada al camión
-    camion.asignar_ruta(ruta, tiempo_ruta)
-
-#nueva politica
-def eliminar_puntos_si_reducen_distancia(ruta, simulacion, x_porcentaje=50, y_max_puntos=15):
-    puntos_eliminados = 0
-    distancia_original = calcular_distancia_ruta(ruta)
-
-    while puntos_eliminados < y_max_puntos and len(ruta) > 2 and simulacion.minuto_actual < 900:  # No podemos eliminar el depósito
-        mejor_reduccion = 0
-        mejor_punto_a_eliminar = None
-
-        for i in range(1, len(ruta) - 1):  # No podemos eliminar el depósito (punto 0 o el último)
-            ruta_temporal = ruta[:i] + ruta[i+1:]
-            distancia_reducida = calcular_distancia_ruta(ruta_temporal)
-
-            reduccion = distancia_original - distancia_reducida
-            porcentaje_reduccion = (reduccion / distancia_original) * 100
-
-            if porcentaje_reduccion >= x_porcentaje and reduccion > mejor_reduccion:
-                mejor_reduccion = reduccion
-                mejor_punto_a_eliminar = i
-
-        if mejor_punto_a_eliminar is not None:
-            ruta.pop(mejor_punto_a_eliminar)
-            puntos_eliminados += 1
-            distancia_original = calcular_distancia_ruta(ruta)  # Actualizar la distancia original
-            print(f"Se eliminó un punto para reducir la distancia en al menos {x_porcentaje}%.")
-        else:
-            break  # No se puede eliminar más puntos que cumplan con el criterio
-
-    return ruta
 
 def registrar_tiempos_delivery(simulacion, camiones):
     # Lista para almacenar los datos de cada delivery (momento de aparición y recogida)
@@ -285,7 +246,7 @@ camiones = [
 
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
-registrar_tiempos_delivery(simulacion, camiones)
+#registrar_tiempos_delivery(simulacion, camiones)
 
 # Llamar a la función para crear el GIF
-crear_gif_con_movimiento_camiones(simulacion)
+#crear_gif_con_movimiento_camiones(simulacion)

@@ -54,8 +54,7 @@ def cheapest_insertion(points, depot, camion, minuto_actual, pedidos_disponibles
             tiempo_restante = 180 - (minuto_actual - pedido.minuto_llegada)
             return tiempo_restante
         else:  # Pick-up
-            tiempo_transcurrido = minuto_actual - 520  # Desde el inicio de la simulación
-            return max(0, tiempo_transcurrido)
+            return(180)
 
     # Ordenar pedidos por prioridad
     pedidos_disponibles = sorted(pedidos_disponibles, key=calcular_prioridad, reverse=False)
