@@ -247,11 +247,30 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
         tiempo_ruta = calcular_tiempo_ruta(camion.rutas[-1], camion.velocidad)
         nueva_ruta = cheapest_insertion_adaptacion(tiempo_ruta, unvisited, camion.rutas[-1], nuevos_pickups, nuevos_pickups, [10000, 10000],
                                                 camion, simulacion.minuto_actual, nuevos_pickups, parametros, current_index, tiempo_limite=180)
-        if nueva_ruta != camion.rutas[-1]:
+
+        nueva_ruta_aux = nueva_ruta.copy()
+        ruta_cam_aux = camion.rutas[-1].copy()
+        nueva_ruta_aux.pop(0)
+        nueva_ruta_aux.pop(-1)
+
+        ruta_cam_aux.pop(0)
+        ruta_cam_aux.pop(-1)
+
+        # Verificar si son idénticas
+        def listas_identicas(lista1, lista2):
+            if len(lista1) != len(lista2):  # Comparar la longitud primero
+                return False
+            return all(np.array_equal(arr1, arr2) for arr1, arr2 in zip(lista1, lista2))
+
+        if not listas_identicas(nueva_ruta_aux, ruta_cam_aux):
             print("Se cambio la ruta por nueva solicitud de pick up")
-            print(nueva_ruta, camion.rutas[-1])
-            #camion.rutas[-1] = nueva_ruta
-            #actualiza el estado de la simulacion
+            print(nueva_ruta)
+            print()
+            print(camion.rutas[-1])
+            camion.rutas[-1] = nueva_ruta
+            actualizar_estado_simulacion(simulacion, nuevos_pickups)
+            #pasarle solo los pickups nuevos no la ruta completa
+
     else:
         print(f"No hay nuevas solicitudes de pick-up disponibles en el minuto {simulacion.minuto_actual}.")
     
@@ -338,22 +357,26 @@ def cheapest_insertion_adaptacion(tiempo_total, unvisited, route, points, pedido
 
     
     pedidos_en_ruta = []
-
+    
+    route = [cord for cord in route if not np.array_equal(cord, [10000, 10000])]
     # Iterar sobre los índices de la ruta
-    for idx in route:
+    for cord in route:
         
-        punto = route[idx]
+        #punto = route[idx]
         # Encontrar el pedido correspondiente en pedidos_disponibles
-        pedidos_en_punto = [pedido for pedido in simulacion.pedidos_entregados if np.array_equal(pedido.coordenadas, punto)]
+        pedidos_en_punto = [pedido for pedido in simulacion.pedidos_disponibles  if np.array_equal(pedido.coordenadas, cord)]
         
         if pedidos_en_punto:
             # Agregar el pedido encontrado a la lista de pedidos en la ruta
             pedidos_en_ruta.append(pedidos_en_punto[0])
         else:
-            print(f"No se encontró un pedido disponible para el punto {punto}")
+            print(f"No se encontró un pedido disponible para el punto {cord}")
+    
     pedidos_en_ruta.extend(pedidos_validos)
     pedidos_validos = pedidos_en_ruta
+    #print(pedidos_validos)
     # Proceso de inserción con prioridades y rechazo inteligente
+    indices_route = list(range(len(pedidos_validos)))
     while unvisited:
         min_increase = float('inf')
         best_position = None
@@ -362,11 +385,14 @@ def cheapest_insertion_adaptacion(tiempo_total, unvisited, route, points, pedido
         # Buscar el mejor punto para insertar
         for point in unvisited:
             # Intentar insertar el punto en cada posición posible
-            for i in range(current_index + 1, len(route)):
+            for i in range(current_index + 1, len(indices_route)):
                 # Crear una ruta temporal con el nuevo punto insertado
-                ruta_temporal = route.copy()
+                ruta_temporal = indices_route.copy()
                 print(ruta_temporal)
                 ruta_temporal.insert(i, point)
+
+                
+                
 
                 # Calcular los tiempos de llegada y el tiempo total de la ruta temporal
                 arrival_times_temp, total_time_temp = calculate_arrival_times(
@@ -400,11 +426,6 @@ def cheapest_insertion_adaptacion(tiempo_total, unvisited, route, points, pedido
                     minuto_actual < parametros["tiempo_necesario_pick_up"]):
                     continue  # Intentar con otro punto
 
-                # Rechazo para "Deliveries"
-                if (pedidos_validos[point].indicador == 0 and
-                    calcular_prioridad(pedidos_validos[point], minuto_actual) > parametros["tiempo_restante_max"] and
-                    increase > parametros["max_aumento_distancia_delivery"]):
-                    continue  # Intentar con otro punto
 
                 # Elegir este punto si el incremento es el menor hasta ahora
                 if increase < min_increase:
@@ -417,7 +438,7 @@ def cheapest_insertion_adaptacion(tiempo_total, unvisited, route, points, pedido
         # Si encontramos un punto para insertar
         if best_point is not None:
             # Insertar el punto en la ruta
-            route.insert(best_position, best_point)
+            indices_route.insert(best_position, best_point)
             unvisited.remove(best_point)
             # Actualizar tiempo_total y arrival_times
             tiempo_total = best_total_time
@@ -425,9 +446,10 @@ def cheapest_insertion_adaptacion(tiempo_total, unvisited, route, points, pedido
         else:
             # No se puede insertar ningún punto sin exceder el tiempo o causar vencimiento de pedidos
             break
+    
 
     # Construir la ruta final
-    ruta_final_coords = [depot] + [pedidos_validos[idx].coordenadas for idx in route] + [depot]
+    ruta_final_coords = [depot] + [pedidos_validos[idx].coordenadas for idx in indices_route] + [depot]
 
     return ruta_final_coords
 
