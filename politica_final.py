@@ -27,7 +27,7 @@
 
 
 import numpy as np
-from ruteo import generar_ruta
+from ruteo import *
 import pickle
 import matplotlib.pyplot as plt
 from funciones_caso_base import *
@@ -207,9 +207,91 @@ def graficar_beneficio(simulacion):
     plt.title('Porcentaje de Beneficio Captado cada 30 Minutos')
     plt.show()
 
+def evaluar_incorporacion_pickup(camion, parametros, simulacion):
+    ruta_actual = camion.rutas[-1]
+    
+    # Obtener solo la lista de tiempos de llegada (primer elemento de la tupla)
+    minutos_de_entrega, _ = hora_entrega_pedidos(ruta_actual, [10000, 10000], camion.velocidad, camion.tiempo_inicio_ruta, service_time=3)
+    tiempo_actual = simulacion.minuto_actual
+    # Verificar si el camión está en alguna casa
+    for i, tiempo_llegada in enumerate(minutos_de_entrega):
+        if tiempo_actual >= tiempo_llegada and tiempo_actual < tiempo_llegada + 3:  # En rango de atención
+                
+                pick_up_nuevos_disponible(camion, parametros, simulacion, i)
+                return 
+
+    # Si no está en una casa, está avanzando
+    print("El camión está en camino hacia el próximo punto.")
+
+def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
+    # Verificar si hay pedidos disponibles
+    if not simulacion.pedidos_disponibles:
+        print(f"No hay solicitudes de pick-up disponibles en el minuto {simulacion.minuto_actual}.")
+        return
+
+    nuevos_pickups = []
+
+    # Revisar los pedidos disponibles para identificar los nuevos pick-ups
+    for pedido in simulacion.pedidos_disponibles:
+        if (
+            pedido.indicador == 1 and  # Solo pick-ups
+            pedido.disponible == 1 and  # Deben estar disponibles
+            pedido.minuto_llegada >= camion.tiempo_inicio_ruta  # Llegaron después de asignar la ruta
+        ):
+            nuevos_pickups.append(pedido)
+
+    # Imprimir los nuevos pick-ups disponibles
+    
+    if nuevos_pickups:
+        unvisited = set(range(len(nuevos_pickups))) 
+        tiempo_ruta = calcular_tiempo_ruta(camion.rutas[-1], camion.velocidad)
+        nueva_ruta = cheapest_insertion_adaptacion(tiempo_ruta, unvisited, camion.rutas[-1], nuevos_pickups, nuevos_pickups, [10000, 10000],
+                                                camion, simulacion.minuto_actual, nuevos_pickups, parametros, current_index, tiempo_limite=180)
+        if nueva_ruta != camion.rutas[-1]:
+            print("Se cambio la ruta por nueva solicitud de pick up")
+            print(nueva_ruta, camion.rutas[-1])
+            #camion.rutas[-1] = nueva_ruta
+            #actualiza el estado de la simulacion
+    else:
+        print(f"No hay nuevas solicitudes de pick-up disponibles en el minuto {simulacion.minuto_actual}.")
+    
+
+def hora_entrega_pedidos(ruta, depot, camion_velocidad, minuto_actual, service_time=3):
+    arrival_times = []
+    current_time = minuto_actual
+    current_location = depot
+
+    # Para cada punto en la ruta
+    for punto in ruta:
+        next_location = punto
+
+        # Calcular el tiempo de viaje al siguiente punto
+        distance = manhattan_distance(current_location, next_location)
+        travel_time = distance / camion_velocidad
+
+        # Tiempo de llegada al siguiente punto
+        arrival_time = current_time + travel_time
+
+        # Actualizar el tiempo actual sumando el tiempo de viaje y el tiempo de atención
+        current_time = arrival_time + service_time
+
+        # Almacenar el tiempo de llegada (antes del servicio)
+        arrival_times.append(arrival_time)
+
+        # Actualizar la ubicación actual
+        current_location = next_location
+
+    # Finalmente, regresar al depósito
+    distance = manhattan_distance(current_location, depot)
+    travel_time = distance / camion_velocidad
+    current_time += travel_time  # Sumar tiempo para regresar al depósito
+
+    return arrival_times, current_time  # Retorna los tiempos de llegada y el tiempo total
+
 # Función que evalúa los criterios de salida de los camiones
 def evaluar_salida(camion, simulacion, parametros):
     if camion.tiempo_restante > 0:
+        evaluar_incorporacion_pickup(camion, parametros, simulacion)
         return False
 
     if len(simulacion.pedidos_disponibles) == 0:
@@ -249,13 +331,154 @@ def registrar_tiempos_delivery(simulacion, camiones):
 
 
 
+
+
+
+def cheapest_insertion_adaptacion(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, current_index, tiempo_limite=180):
+
+    
+    pedidos_en_ruta = []
+
+    # Iterar sobre los índices de la ruta
+    for idx in route:
+        
+        punto = route[idx]
+        # Encontrar el pedido correspondiente en pedidos_disponibles
+        pedidos_en_punto = [pedido for pedido in simulacion.pedidos_entregados if np.array_equal(pedido.coordenadas, punto)]
+        
+        if pedidos_en_punto:
+            # Agregar el pedido encontrado a la lista de pedidos en la ruta
+            pedidos_en_ruta.append(pedidos_en_punto[0])
+        else:
+            print(f"No se encontró un pedido disponible para el punto {punto}")
+    pedidos_en_ruta.extend(pedidos_validos)
+    pedidos_validos = pedidos_en_ruta
+    # Proceso de inserción con prioridades y rechazo inteligente
+    while unvisited:
+        min_increase = float('inf')
+        best_position = None
+        best_point = None
+
+        # Buscar el mejor punto para insertar
+        for point in unvisited:
+            # Intentar insertar el punto en cada posición posible
+            for i in range(current_index + 1, len(route)):
+                # Crear una ruta temporal con el nuevo punto insertado
+                ruta_temporal = route.copy()
+                print(ruta_temporal)
+                ruta_temporal.insert(i, point)
+
+                # Calcular los tiempos de llegada y el tiempo total de la ruta temporal
+                arrival_times_temp, total_time_temp = calculate_arrival_times(
+                    ruta_temporal, pedidos_validos, depot, camion.velocidad, minuto_actual, service_time=3
+                )
+
+                # Verificar si la ruta temporal cumple con el horizonte de tiempo
+                if total_time_temp > 1020:
+                    continue  # No se puede insertar el punto en esta posición
+
+                # Verificar que podemos llegar a todos los puntos antes de que venzan
+                all_points_valid = True
+                for idx_ruta, arrival_time in zip(ruta_temporal, arrival_times_temp):
+                    pedido_ruta = pedidos_validos[idx_ruta]
+                    if pedido_ruta.indicador == 0:
+                        expiration_time_ruta = pedido_ruta.minuto_llegada + tiempo_limite
+                        if arrival_time > expiration_time_ruta:
+                            # No se puede llegar a este punto antes de que venza
+                            all_points_valid = False
+                            break
+
+                if not all_points_valid:
+                    continue  # No considerar esta inserción
+
+                # Calcular el incremento en el tiempo respecto a la ruta actual
+                increase = total_time_temp - tiempo_total
+
+                # Rechazo para "Pick-ups"
+                if (pedidos_validos[point].indicador == 1 and
+                    increase > parametros["max_aumento_distancia"] * (minuto_actual / parametros["tiempo_necesario_pick_up"]) and
+                    minuto_actual < parametros["tiempo_necesario_pick_up"]):
+                    continue  # Intentar con otro punto
+
+                # Rechazo para "Deliveries"
+                if (pedidos_validos[point].indicador == 0 and
+                    calcular_prioridad(pedidos_validos[point], minuto_actual) > parametros["tiempo_restante_max"] and
+                    increase > parametros["max_aumento_distancia_delivery"]):
+                    continue  # Intentar con otro punto
+
+                # Elegir este punto si el incremento es el menor hasta ahora
+                if increase < min_increase:
+                    min_increase = increase
+                    best_position = i
+                    best_point = point
+                    best_total_time = total_time_temp
+                    best_arrival_times = arrival_times_temp
+
+        # Si encontramos un punto para insertar
+        if best_point is not None:
+            # Insertar el punto en la ruta
+            route.insert(best_position, best_point)
+            unvisited.remove(best_point)
+            # Actualizar tiempo_total y arrival_times
+            tiempo_total = best_total_time
+            arrival_times = best_arrival_times
+        else:
+            # No se puede insertar ningún punto sin exceder el tiempo o causar vencimiento de pedidos
+            break
+
+    # Construir la ruta final
+    ruta_final_coords = [depot] + [pedidos_validos[idx].coordenadas for idx in route] + [depot]
+
+    return ruta_final_coords
+
+
+def calculate_arrival_times_adapted(ruta, depot, camion_velocidad, minuto_actual, service_time=3):
+    arrival_times = []
+    current_time = minuto_actual
+    current_location = depot
+    
+    # Para cada punto en la ruta
+    for punto in ruta:
+        next_location = punto
+        
+        # Calcular el tiempo de viaje al siguiente punto
+        distance = manhattan_distance(current_location, next_location)
+        travel_time = distance / camion_velocidad
+
+        # Tiempo de llegada al siguiente punto
+        arrival_time = current_time + travel_time
+
+        # Actualizar el tiempo actual sumando el tiempo de viaje y el tiempo de atención
+        current_time = arrival_time + service_time
+
+        # Almacenar el tiempo de llegada (antes del servicio)
+        arrival_times.append(arrival_time)
+
+        # Actualizar la ubicación actual
+        current_location = next_location
+
+    # Finalmente, regresar al depósito
+    distance = manhattan_distance(current_location, depot)
+    travel_time = distance / camion_velocidad
+    current_time += travel_time  # Sumar tiempo para regresar al depósito
+
+    return arrival_times, current_time  # Retorna los tiempos de llegada y el tiempo total
+
+
+
+
+
+
+
+
+
 # Parámetros de la simulación (ajustables por Optuna)
 parametros_ventana_1 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016}
 parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28}
 parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556}
 
 # Cargar los datos de la simulación desde archivos pickle
-with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
+with open("Instancia Tipo IV/scen_points_sample.pkl", 'rb') as f:
     points = pickle.load(f)[3]  # Seleccionar la primera simulación para este ejemplo
 with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
     llegadas = pickle.load(f)[3]
