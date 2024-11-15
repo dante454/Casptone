@@ -37,7 +37,7 @@ velocidad_inicial = v_a_m(25)  # Velocidad inicial en km/h
 incremento_velocidad = v_a_m(5)  # Incremento en km/h por iteración
 velocidad_maxima = v_a_m(200)  # Velocidad máxima deseada
 beneficios = []
-velocidades = [i for i in range(25,200,5)]
+velocidades = [i for i in range(25,125,5)]
 
 # Análisis de sensibilidad
 velocidad = velocidad_inicial

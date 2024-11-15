@@ -1,3 +1,31 @@
+# Parametros calibrados:
+# * Instancia 1:
+#     * {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 31, 'max_puntos_eliminados': 14, 'x_minutos': 20, 'limite_area1': 128, 'limite_area2': 210, 'peso_min_pedidos': 1.4258208140237363, 'peso_ventana_tiempo': 1.7845358791509105, 'umbral_salida': 1.9097996396208297, 'tiempo_minimo_pickup': 39, 'max_aumento_distancia': 11, 'tiempo_necesario_pick_up': 1378, 'tiempo_restante_max': 111, 'max_aumento_distancia_delivery': 844}
+#     * 
+#     * {'min_pedidos_salida': 13, 'porcentaje_reduccion_distancia': 37, 'max_puntos_eliminados': 8, 'x_minutos': 59, 'limite_area1': 134, 'limite_area2': 186, 'peso_min_pedidos': 1.4345567915049973, 'peso_ventana_tiempo': 1.3588844137499472, 'umbral_salida': 1.3851690157693943, 'tiempo_minimo_pickup': 38, 'max_aumento_distancia': 20, 'tiempo_necesario_pick_up': 968, 'tiempo_restante_max': 9, 'max_aumento_distancia_delivery': 29}
+#     * 
+#     * {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 62, 'max_puntos_eliminados': 17, 'x_minutos': 56, 'limite_area1': 93, 'limite_area2': 270, 'peso_min_pedidos': 1.3683745561452805, 'peso_ventana_tiempo': 1.5087497070531928, 'umbral_salida': 1.609613386809045, 'tiempo_minimo_pickup': 26, 'max_aumento_distancia': 9, 'tiempo_necesario_pick_up': 1054, 'tiempo_restante_max': 137, 'max_aumento_distancia_delivery': 11}
+# * Instancia 2:
+#     * {'min_pedidos_salida': 14, 'porcentaje_reduccion_distancia': 36, 'max_puntos_eliminados': 7, 'x_minutos': 3, 'limite_area1': 134, 'limite_area2': 210, 'peso_min_pedidos': 1.9687142346197708, 'peso_ventana_tiempo': 1.1025506899704678, 'umbral_salida': 1.7115549689422893, 'tiempo_minimo_pickup': 18, 'max_aumento_distancia': 7, 'tiempo_necesario_pick_up': 1413, 'tiempo_restante_max': 130, 'max_aumento_distancia_delivery': 280}
+#     * 
+#     * {'min_pedidos_salida': 18, 'porcentaje_reduccion_distancia': 30, 'max_puntos_eliminados': 16, 'x_minutos': 2, 'limite_area1': 92, 'limite_area2': 213, 'peso_min_pedidos': 1.389935989337192, 'peso_ventana_tiempo': 0.8677152709217305, 'umbral_salida': 1.392232984569243, 'tiempo_minimo_pickup': 28, 'max_aumento_distancia': 9, 'tiempo_necesario_pick_up': 886, 'tiempo_restante_max': 101, 'max_aumento_distancia_delivery': 29}
+#     * 
+#     * {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 63, 'max_puntos_eliminados': 14, 'x_minutos': 27, 'limite_area1': 109, 'limite_area2': 199, 'peso_min_pedidos': 1.129656004873347, 'peso_ventana_tiempo': 0.6032264027418948, 'umbral_salida': 1.1825581718546028, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 5, 'tiempo_necesario_pick_up': 1143, 'tiempo_restante_max': 100, 'max_aumento_distancia_delivery': 41}
+# * Instancia 3:
+#     * {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 6, 'x_minutos': 50, 'limite_area1': 119, 'limite_area2': 267, 'peso_min_pedidos': 0.5971182427582737, 'peso_ventana_tiempo': 0.713478246757084, 'umbral_salida': 1.011875143339422, 'tiempo_minimo_pickup': 31, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 824, 'tiempo_restante_max': 118, 'max_aumento_distancia_delivery': 491}
+#     * 
+#     * {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 63, 'max_puntos_eliminados': 9, 'x_minutos': 40, 'limite_area1': 144, 'limite_area2': 239, 'peso_min_pedidos': 1.2709372730059911, 'peso_ventana_tiempo': 1.5742119038813274, 'umbral_salida': 1.587618895342463, 'tiempo_minimo_pickup': 44, 'max_aumento_distancia': 14, 'tiempo_necesario_pick_up': 1272, 'tiempo_restante_max': 122, 'max_aumento_distancia_delivery': 19}
+#     * 
+#     * {'min_pedidos_salida': 19, 'porcentaje_reduccion_distancia': 67, 'max_puntos_eliminados': 13, 'x_minutos': 1, 'limite_area1': 140, 'limite_area2': 180, 'peso_min_pedidos': 0.7993143719423276, 'peso_ventana_tiempo': 0.8241533963555013, 'umbral_salida': 1.231678361485861, 'tiempo_minimo_pickup': 27, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 1405, 'tiempo_restante_max': 174, 'max_aumento_distancia_delivery': 82}
+# * Instancia 4:
+#     * {'min_pedidos_salida': 2, 'porcentaje_reduccion_distancia': 46, 'max_puntos_eliminados': 13, 'x_minutos': 8, 'limite_area1': 143, 'limite_area2': 232, 'peso_min_pedidos': 1.3650083117702956, 'peso_ventana_tiempo': 1.8548290102815066, 'umbral_salida': 1.5601612050582978, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 12, 'tiempo_necesario_pick_up': 1294, 'tiempo_restante_max': 195, 'max_aumento_distancia_delivery': 1227}
+#     * 
+#     * {'min_pedidos_salida': 2, 'porcentaje_reduccion_distancia': 49, 'max_puntos_eliminados': 12, 'x_minutos': 37, 'limite_area1': 109, 'limite_area2': 235, 'peso_min_pedidos': 1.3462605634101168, 'peso_ventana_tiempo': 1.523125976294386, 'umbral_salida': 1.4604432560468708, 'tiempo_minimo_pickup': 37, 'max_aumento_distancia': 11, 'tiempo_necesario_pick_up': 1445, 'tiempo_restante_max': 54, 'max_aumento_distancia_delivery': 1436}
+#     * 
+#     * {'min_pedidos_salida': 15, 'porcentaje_reduccion_distancia': 68, 'max_puntos_eliminados': 11, 'x_minutos': 58, 'limite_area1': 141, 'limite_area2': 239, 'peso_min_pedidos': 1.9138181730131887, 'peso_ventana_tiempo': 1.8613353548514777, 'umbral_salida': 1.3676121600899114, 'tiempo_minimo_pickup': 33, 'max_aumento_distancia': 9, 'tiempo_necesario_pick_up': 1442, 'tiempo_restante_max': 166, 'max_aumento_distancia_delivery': 916}
+
+
+
 import numpy as np
 from ruteo import generar_ruta
 import pickle
