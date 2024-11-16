@@ -55,7 +55,7 @@ def cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, 
             for i in range(len(route) + 1):
                 # Crear una ruta temporal con el nuevo punto insertado
                 ruta_temporal = route.copy()
-                print(ruta_temporal)
+                
                 ruta_temporal.insert(i, point)
 
                 # Calcular los tiempos de llegada y el tiempo total de la ruta temporal

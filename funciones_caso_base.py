@@ -118,6 +118,8 @@ class Camion:
         self.velocidad = ((25 * 1000) / 60) #metro/minuto
         self.rutas = []  # Almacena todas las rutas realizadas por el camión
         self.tiempo_inicio_ruta = None
+        self.posicion_actual = None
+        
 
     def actualizar_tiempo(self):
         if self.tiempo_restante > 1:
@@ -131,8 +133,30 @@ class Camion:
         self.tiempo_inicio_ruta = tiempo_inicio  # Registrar el tiempo de inicio de la ruta
         print(f"Camión {self.id} asignado a una nueva ruta, tiempo de ruta: {tiempo_ruta} minutos")
         
+    def actualizar_posicion(self, minuto_actual):
+        if self.rutas and self.tiempo_restante != 0:
+            ruta_actual = self.rutas[-1]  # Tomar la última ruta asignada
+            tiempo_en_ruta = minuto_actual - self.tiempo_inicio_ruta
+            self.posicion_actual = calcular_posicion_actual(ruta_actual, tiempo_en_ruta, self.velocidad)
+        else:
+            self.posicion_actual = None
 
-
+    # Función para calcular la posición actual del camión
+def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad):
+    distancia_recorrida = tiempo_transcurrido * velocidad
+    distancia_acumulada = 0
+    for i in range(1, len(ruta)):
+        distancia_segmento = calcular_distancia(ruta[i-1], ruta[i])
+        if distancia_acumulada + distancia_segmento >= distancia_recorrida:
+            # Interpolar entre los puntos
+            fraccion = (distancia_recorrida - distancia_acumulada) / distancia_segmento
+            x = ruta[i-1][0] + fraccion * (ruta[i][0] - ruta[i-1][0])
+            y = ruta[i-1][1] + fraccion * (ruta[i][1] - ruta[i-1][1])
+            return (x, y)
+        distancia_acumulada += distancia_segmento
+    # Si ha recorrido toda la ruta, devolver el último punto
+    return ruta[-1]
+    
 def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimiento_camiones.gif"):
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_xlim(0, 20000)
@@ -142,23 +166,6 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
     colores_camiones = ["cyan", "magenta", "orange"]
     velocidad_camion = ((25 * 1000) / 60)  # 25 km/h convertidos a metros por minuto
 
-    # Función para calcular la posición actual del camión
-    def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad):
-        distancia_recorrida = tiempo_transcurrido * velocidad
-        distancia_acumulada = 0
-
-        for i in range(1, len(ruta)):
-            distancia_segmento = calcular_distancia(ruta[i-1], ruta[i])
-            if distancia_acumulada + distancia_segmento >= distancia_recorrida:
-                # Interpolar entre los puntos
-                fraccion = (distancia_recorrida - distancia_acumulada) / distancia_segmento
-                x = ruta[i-1][0] + fraccion * (ruta[i][0] - ruta[i-1][0])
-                y = ruta[i-1][1] + fraccion * (ruta[i][1] - ruta[i-1][1])
-                return (x, y)
-            distancia_acumulada += distancia_segmento
-
-        # Si ha recorrido toda la ruta, devolver el último punto
-        return ruta[-1]
 
     # Función para actualizar cada cuadro de la animación
     def actualizar(frame):
