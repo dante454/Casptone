@@ -145,7 +145,11 @@ class Camion:
 def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad):
     distancia_recorrida = tiempo_transcurrido * velocidad
     distancia_acumulada = 0
+    tiempo_en_punto = 0
     for i in range(1, len(ruta)):
+        # if tiempo_transcurrido <= tiempo_en_punto:
+        #     return ruta[i - 1]
+        # tiempo_transcurrido -= 3 
         distancia_segmento = calcular_distancia(ruta[i-1], ruta[i])
         if distancia_acumulada + distancia_segmento >= distancia_recorrida:
             # Interpolar entre los puntos
@@ -282,7 +286,7 @@ def calcular_distancia(punto1, punto2):
 # Función placeholder para calcular el tiempo de la ruta
 def calcular_tiempo_ruta(ruta, velocidad_camion):
     distancia_total = calcular_distancia_ruta(ruta)
-    tiempo_extra = (len(ruta) - 2) * 3 #5 minutos en entregar cada pedido
+    tiempo_extra = (len(ruta) - 2) * 3 #3 minutos en entregar cada pedido
     return ((distancia_total / velocidad_camion)  + tiempo_extra)# Tiempo en minutos
 
 
