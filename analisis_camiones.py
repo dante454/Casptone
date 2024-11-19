@@ -21,9 +21,43 @@ def inicializar_simulacion(camion_count, indx):
     return simulacion, camiones
 
 # Parámetros de simulación para cada ventana de tiempo
+#Instancia 1
+# parametros_ventana_1 = {'min_pedidos_salida': 10, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 1, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 0.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13000, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 1900, 'max_aumento_distancia_delivery': 1016}
+
+# parametros_ventana_2 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 1, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 0.04367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8000, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 900, 'max_aumento_distancia_delivery': 2800}
+
+# parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 1, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 0.04795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19000, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 900, 'max_aumento_distancia_delivery': 5560}
+
+
+# instancia 2
+
+# parametros_ventana_1 = {'min_pedidos_salida': 10, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 1, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 0.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13000, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 1900, 'max_aumento_distancia_delivery': 1016}
+
+# parametros_ventana_2 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 1, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 0.04367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8000, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 900, 'max_aumento_distancia_delivery': 2800}
+
+# parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 1, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 0.04795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19000, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 900, 'max_aumento_distancia_delivery': 5560}
+
+
+#instancia 3
+# parametros_ventana_1 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016}
+
+# parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28}
+
+# parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556}
+
+
+
+
+
+ # instancia 4
 parametros_ventana_1 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016}
+
 parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28}
+
 parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556}
+
+
+
 
 # Configuraciones del análisis
 max_beneficio = 100  # Beneficio total deseado como porcentaje

@@ -8,26 +8,26 @@ from optuna_analisis_sens import funcion_opti_optuna
 
 
 
-def analisis_sensibilidad(camion_max=20, iteraciones_optuna=100):
+def analisis_sensibilidad(camion_max=25, iteraciones_optuna=1000):
     beneficios_promedio = []
     num_camiones = []
     max_beneficio = 100  # Meta de beneficio como porcentaje
 
     # Cargar los datos de simulación
-    with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
+    with open('Instancia Tipo I/scen_points_sample.pkl', 'rb') as f:
         puntos_simulaciones = pickle.load(f)
-    with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
+    with open('Instancia Tipo I/scen_arrivals_sample.pkl', 'rb') as f:
         llegadas_simulaciones = pickle.load(f)
-    with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
+    with open('Instancia Tipo I/scen_indicador_sample.pkl', 'rb') as f:
         indicadores_simulaciones = pickle.load(f)
 
     for camion_count in range(3, camion_max + 1):
         beneficios_iteracion = []
 
     # Cargar un conjunto diferente de puntos, arribos e indicadores
-        points = puntos_simulaciones[2]
-        llegadas = llegadas_simulaciones[2]
-        indicadores = indicadores_simulaciones[2]
+        points = puntos_simulaciones[10]
+        llegadas = llegadas_simulaciones[10]
+        indicadores = indicadores_simulaciones[10]
         arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]
         
         # Optimizar parámetros para este día

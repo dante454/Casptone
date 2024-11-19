@@ -141,26 +141,52 @@ class Camion:
         else:
             self.posicion_actual = None
 
+  
+def manhattan_distance(p1, p2):
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+  
     # Función para calcular la posición actual del camión
-def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad):
-    distancia_recorrida = tiempo_transcurrido * velocidad
-    distancia_acumulada = 0
-    tiempo_en_punto = 0
+def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad_camion):
+    tiempo_servicio=3
+    tiempos_acumulados = [0]  # Lista para almacenar tiempos acumulados en cada punto
+    tiempos_segmento = []     # Lista para almacenar tiempos de cada segmento (viaje + servicio)
+
+    # Calcular tiempos acumulados en cada punto de la ruta
     for i in range(1, len(ruta)):
-        # if tiempo_transcurrido <= tiempo_en_punto:
-        #     return ruta[i - 1]
-        # tiempo_transcurrido -= 3 
-        distancia_segmento = calcular_distancia(ruta[i-1], ruta[i])
-        if distancia_acumulada + distancia_segmento >= distancia_recorrida:
-            # Interpolar entre los puntos
-            fraccion = (distancia_recorrida - distancia_acumulada) / distancia_segmento
-            x = ruta[i-1][0] + fraccion * (ruta[i][0] - ruta[i-1][0])
-            y = ruta[i-1][1] + fraccion * (ruta[i][1] - ruta[i-1][1])
-            return (x, y)
-        distancia_acumulada += distancia_segmento
-    # Si ha recorrido toda la ruta, devolver el último punto
+        # Distancia entre puntos
+        distancia = manhattan_distance(ruta[i-1], ruta[i])
+        tiempo_viaje = distancia / velocidad_camion
+        tiempo_total_segmento = tiempo_viaje + tiempo_servicio  # Tiempo de viaje + tiempo de servicio en el punto anterior
+        tiempos_segmento.append(tiempo_total_segmento)
+        tiempos_acumulados.append(tiempos_acumulados[-1] + tiempo_total_segmento)
+
+    # Verificar si el camión ya terminó su ruta
+    if tiempo_transcurrido >= tiempos_acumulados[-1]:
+        return ruta[-1]  # El camión está en el último punto de la ruta
+
+    # Determinar en qué segmento de la ruta se encuentra el camión
+    for i in range(1, len(tiempos_acumulados)):
+        if tiempo_transcurrido < tiempos_acumulados[i]:
+            tiempo_en_segmento = tiempo_transcurrido - tiempos_acumulados[i-1]
+            # Verificar si el camión está en servicio (esperando) en el punto
+            if tiempo_en_segmento <= tiempo_servicio:
+                # El camión está esperando en el punto i-1
+                return ruta[i-1]
+            else:
+                # El camión está viajando hacia el siguiente punto
+                tiempo_en_viaje = tiempo_en_segmento - tiempo_servicio
+                distancia_segmento = manhattan_distance(ruta[i-1], ruta[i])
+                fraccion_recorrida = (velocidad_camion * tiempo_en_viaje) / distancia_segmento
+                fraccion_recorrida = min(max(fraccion_recorrida, 0), 1)  # Asegurar que esté entre 0 y 1
+
+                # Calcular posición actual interpolando entre el punto i-1 y el punto i
+                x_actual = ruta[i-1][0] + fraccion_recorrida * (ruta[i][0] - ruta[i-1][0])
+                y_actual = ruta[i-1][1] + fraccion_recorrida * (ruta[i][1] - ruta[i-1][1])
+                return [x_actual, y_actual]
+
+    # Si no se encontró, devolver la última posición conocida
     return ruta[-1]
-    
+
 def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimiento_camiones.gif"):
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_xlim(0, 20000)
@@ -280,8 +306,6 @@ def procesar_tiempos(arrivals, division_minutos):
     arribos_por_minuto = df.apply(lambda x: x.value_counts().sort_index()).fillna(0).astype(int)
     return arribos_por_minuto
 
-def calcular_distancia(punto1, punto2):
-    return abs(punto1[0] - punto2[0]) + abs(punto1[1] - punto2[1])
 
 # Función placeholder para calcular el tiempo de la ruta
 def calcular_tiempo_ruta(ruta, velocidad_camion):
@@ -295,7 +319,7 @@ def calcular_distancia_ruta(ruta):
 
     # Calcular la distancia entre cada par de puntos consecutivos en la ruta
     for i in range(1, len(ruta)):
-        distancia_total += calcular_distancia(ruta[i-1], ruta[i])
+        distancia_total += manhattan_distance(ruta[i-1], ruta[i])
 
     return distancia_total
 

@@ -14,16 +14,20 @@ from funciones_caso_base import *
 #    -------------------  ¡¡¡¡ IMPORTANTE !!!!!! --------------------
 
 #si se quiere simular Solucion inicial/Politica final dejar esta linea, si no comentarla
-from politica_final import simular_minuto_a_minuto
+#from politica_final import simular_minuto_a_minuto
 
 #si se quiere ejecutar Caso_base ejecutar esta linea, si no comentarla:
-#from caso_base_2 import simular_minuto_a_minuto
+from caso_base_2 import simular_minuto_a_minuto
 
 
 # Parámetros de las ventanas de tiempo (ajustados previamente en Optuna)
-parametros_ventana_1 = {'min_pedidos_salida': 6, 'porcentaje_reduccion_distancia': 48, 'max_puntos_eliminados': 7, 'x_minutos': 14, 'limite_area1': 99, 'limite_area2': 219, 'peso_min_pedidos': 0.5053907930602788, 'peso_ventana_tiempo': 1.26559812361353, 'umbral_salida': 1.7215286984662614, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1000, 'tiempo_restante_max': 169, 'max_aumento_distancia_delivery': 71}
-parametros_ventana_2 = {'min_pedidos_salida': 6, 'porcentaje_reduccion_distancia': 38, 'max_puntos_eliminados': 15, 'x_minutos': 15, 'limite_area1': 145, 'limite_area2': 185, 'peso_min_pedidos': 0.5036249735873504, 'peso_ventana_tiempo': 0.6160401293905916, 'umbral_salida': 1.1596366169682866, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 17, 'tiempo_necesario_pick_up': 1137, 'tiempo_restante_max': 107, 'max_aumento_distancia_delivery': 78}
-parametros_ventana_3 = {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 6, 'x_minutos': 56, 'limite_area1': 112, 'limite_area2': 230, 'peso_min_pedidos': 1.5749264915561263, 'peso_ventana_tiempo': 1.9963865650894679, 'umbral_salida': 1.4696212191447602, 'tiempo_minimo_pickup': 23, 'max_aumento_distancia': 5, 'tiempo_necesario_pick_up': 1050, 'tiempo_restante_max': 109, 'max_aumento_distancia_delivery': 75}
+
+
+parametros_ventana_1 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 47, 'max_puntos_eliminados': 16, 'x_minutos': 18, 'limite_area1': 147, 'limite_area2': 215, 'peso_min_pedidos': 1.6525938339343251, 'peso_ventana_tiempo': 1.8947957184968578, 'umbral_salida': 1.126101447963525, 'tiempo_minimo_pickup': 31, 'max_aumento_distancia': 16, 'tiempo_necesario_pick_up': 661, 'tiempo_restante_max': 106, 'max_aumento_distancia_delivery': 1048}
+
+parametros_ventana_2 =  {'min_pedidos_salida': 3, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 15, 'x_minutos': 9, 'limite_area1': 140, 'limite_area2': 243, 'peso_min_pedidos': 1.8017927848294588, 'peso_ventana_tiempo': 1.325020645146538, 'umbral_salida': 1.488642659103274, 'tiempo_minimo_pickup': 37, 'max_aumento_distancia': 14, 'tiempo_necesario_pick_up': 975, 'tiempo_restante_max': 181, 'max_aumento_distancia_delivery': 1351}
+
+parametros_ventana_3 = {'min_pedidos_salida': 12, 'porcentaje_reduccion_distancia': 42, 'max_puntos_eliminados': 17, 'x_minutos': 25, 'limite_area1': 110, 'limite_area2': 231, 'peso_min_pedidos': 1.0883231580184491, 'peso_ventana_tiempo': 1.0133168647668476, 'umbral_salida': 1.9840669226875491, 'tiempo_minimo_pickup': 34, 'max_aumento_distancia': 12, 'tiempo_necesario_pick_up': 1438, 'tiempo_restante_max': 68, 'max_aumento_distancia_delivery': 1355}
 
 
 # Cargar los datos de la simulación para los 100 días
@@ -40,6 +44,7 @@ distancias_totales = []
 tiempos_promedio_entrega = []
 pickups_completados = []
 deliveries_completados = []
+numero_rutas = []
 
 # Ejecutar la simulación para cada uno de los 100 días
 for dia in range(100):
@@ -67,11 +72,11 @@ for dia in range(100):
 
     #    ------------------- ¡¡¡¡ IMPORTANTE !!!!!! --------------------
     #SI es para la solucion inicial ejecutar la siguente linea
-    simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
+    #simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
     #si se esta simulando para el caso base ejecutar las siguentes lineas: SINO, COMENTARLAS
-    # x_minutos = 60  
-    # simular_minuto_a_minuto(simulacion, camiones, x_minutos)
+    x_minutos = 60  
+    simular_minuto_a_minuto(simulacion, camiones, x_minutos)
 
     # Recopilar los KPIs del día
     beneficio_total = calcular_beneficio(simulacion)
@@ -80,12 +85,16 @@ for dia in range(100):
     tiempo_respuesta_promedio = sum(tiempos_respuesta) / len(tiempos_respuesta)
     cantidad_pickups = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 1)
     cantidad_deliveries = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 0)
+    rutas = sum(len(camion.rutas) for camion in camiones )
+
 
     tiempos_promedio_entrega.append(tiempo_respuesta_promedio)
     beneficios.append(beneficio_total)
     distancias_totales.append(distancia_total)
     pickups_completados.append(cantidad_pickups)
     deliveries_completados.append(cantidad_deliveries)
+    numero_rutas.append(rutas)
+
 
 #calcualr % minimo y maximo obtenido
 benef_max = max(beneficios)
@@ -98,6 +107,8 @@ distancia_promedio = sum(distancias_totales) / len(distancias_totales)
 tiempo_promedio_entrega = sum(tiempos_promedio_entrega) / len(tiempos_promedio_entrega)
 pickup_promedio = sum(pickups_completados) / len(pickups_completados)
 delivery_promedio = sum(deliveries_completados) / len(deliveries_completados)
+rutas_promedio = sum(numero_rutas) / len(numero_rutas)
+largo_rutas_prom = distancia_promedio / rutas_promedio
 
 # Mostrar los resultados
 print('\n', '--'*16)
@@ -109,4 +120,6 @@ print(f"Distancia Promedio Recorrida: {distancia_promedio}")
 print(f"Tiempo Promedio de Entrega: {tiempo_promedio_entrega}\n")
 print(f"Pickups Completados Promedio: {pickup_promedio}")
 print(f"Deliveries Completados Promedio: {delivery_promedio}")
+print(f'Largo de ruta promedio: {largo_rutas_prom}')
+print(f'Rutas promedio {rutas_promedio}')
 

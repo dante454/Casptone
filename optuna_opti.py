@@ -72,14 +72,14 @@ def objetivo(trial):
     beneficios = []
 
     # Ejecutar la simulación para cada uno de los 100 días
-    for dia in range(50):
+    for dia in range(1):
         print(f"Simulando el día {dia + 1}...")
 
-        with open('Instancia Tipo III/scen_points_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
             puntos_simulaciones = pickle.load(f)
-        with open('Instancia Tipo III/scen_arrivals_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
             llegadas_simulaciones = pickle.load(f)
-        with open('Instancia Tipo III/scen_indicador_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
             indicadores_simulaciones = pickle.load(f)
         # Cargar los datos específicos del día
         points = puntos_simulaciones[dia]
@@ -118,7 +118,7 @@ def objetivo(trial):
 
 # Crear un estudio de Optuna para maximizar el beneficio
 estudio = optuna.create_study(direction="maximize")
-estudio.optimize(objetivo, n_trials=200)  # n_trials es el número de iteraciones
+estudio.optimize(objetivo, n_trials=1000)  # n_trials es el número de iteraciones
 
 # Obtener los mejores parámetros y su valor de beneficio total
 mejores_parametros = estudio.best_params

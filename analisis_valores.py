@@ -1,7 +1,8 @@
 
 import matplotlib.pyplot as plt
 import pickle
-from  politica_final import simular_minuto_a_minuto, EstadoSimulacion, Camion
+from  politica_final import Camion
+from ruteo_analisis_valores import *
 from  funciones_caso_base import procesar_tiempos
 import optuna
 
@@ -11,15 +12,15 @@ def calcular_porcentaje_beneficio(simulacion, beneficio_acumulado, valor_deliv, 
         if beneficio_maximo == 0:
             return 0  # Evita división por cero
         return (beneficio_acumulado / beneficio_maximo) * 100
+
+
 # Función para calcular el beneficio acumulado
 def calcular_beneficio_acumulado(simulacion, valor_deliv, valor_pick):
     return sum(valor_pick if pedido.indicador == 1 else valor_deliv 
                for pedido in simulacion.pedidos_entregados)
 
-# Función para calcular el beneficio máximo posible
-def calcular_beneficio_maximo(simulacion, valor_deliv, valor_pick):
-    return sum(valor_pick if pedido.indicador == 1 else valor_deliv  
-               for pedido in (simulacion.pedidos_entregados + simulacion.pedidos_disponibles + simulacion.pedidos_no_disponibles))
+
+
 
 # Función para optimizar parámetros usando Optuna
 def funcion_opti_optuna(points, arribos_por_minuto, indicadores, iter, valor_deliv, valor_pick):
@@ -80,9 +81,9 @@ def funcion_opti_optuna(points, arribos_por_minuto, indicadores, iter, valor_del
             "tiempo_maximo_entrega": 180,  # Valor constante
         }
 
-        simulacion = EstadoSimulacion(minuto_inicial=520, puntos=points, indicadores=indicadores, arribos_por_minuto=arribos_por_minuto)
+        simulacion = EstadoSimulacion2(minuto_inicial=520, puntos=points, indicadores=indicadores, arribos_por_minuto=arribos_por_minuto)
         camiones = [Camion(id=i+1, tiempo_inicial=0) for i in range(3)]
-        simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
+        simular_minuto_a_minuto2(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3, valor_pick, valor_deliv)
         
         benef_acumulado = calcular_beneficio_acumulado(simulacion, valor_deliv, valor_pick)
         beneficio_total = calcular_porcentaje_beneficio(simulacion, benef_acumulado, valor_deliv, valor_pick)
@@ -99,10 +100,14 @@ def funcion_opti_optuna(points, arribos_por_minuto, indicadores, iter, valor_del
     ]
 
 # Análisis de sensibilidad
-def analisis_sensibilidad(iteraciones_optuna=15):
-    proporcion_pickups = []
-    proporcion_deliveries = []
-    
+def analisis_sensibilidad(iteraciones_optuna, pickups, deliveries):
+    proporcion_pickups = []  # Lista para almacenar las proporciones de pickups tomados
+    proporcion_deliveries = []  # Lista para almacenar las proporciones de deliveries tomados
+
+    # Almacenar resultados de las 100 iteraciones
+    resultados_pickups_iteraciones = []
+    resultados_deliveries_iteraciones = []
+
     with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
         puntos_simulaciones = pickle.load(f)
     with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
@@ -110,56 +115,82 @@ def analisis_sensibilidad(iteraciones_optuna=15):
     with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
         indicadores_simulaciones = pickle.load(f)
 
-    for valor_pick in range(2, 6, 2):
-        pickup_rates = []
-        delivery_rates = []
-        points = puntos_simulaciones[5]
-        llegadas = llegadas_simulaciones[5]
-        indicadores = indicadores_simulaciones[5]
+    points = puntos_simulaciones[5]
+    llegadas = llegadas_simulaciones[5]
+    indicadores = indicadores_simulaciones[5]
+    arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]
+
+    mejores_parametros = funcion_opti_optuna(points, arribos_por_minuto, indicadores, iteraciones_optuna, deliveries, pickups)
+
+    for i in range(100):
+        points = puntos_simulaciones[i]
+        llegadas = llegadas_simulaciones[i]
+        indicadores = indicadores_simulaciones[i]
         arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]
-            
-            # Optimización para los parámetros diarios
-        mejores_parametros = funcion_opti_optuna(points, arribos_por_minuto, indicadores, iteraciones_optuna, valor_deliv=2, valor_pick=valor_pick)
 
-        for i in range(1):  # Iterar 100 días
-            points = puntos_simulaciones[i]
-            llegadas = llegadas_simulaciones[i]
-            indicadores = indicadores_simulaciones[i]
-            arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]
-            
-            
-            # Configurar simulación y camiones con parámetros optimizados
-            simulacion = EstadoSimulacion(minuto_inicial=520, puntos=points, indicadores=indicadores, arribos_por_minuto=arribos_por_minuto)
-            camiones = [Camion(id=j+1, tiempo_inicial=0) for j in range(3)]
-            simular_minuto_a_minuto(simulacion, camiones, mejores_parametros[0], mejores_parametros[1], mejores_parametros[2])
-            
-            # Calcular pickups y deliveries completados
-            total_pickups = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 1)
-            total_deliveries = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador != 1)
-            pickups_disponibles = sum(1 for pedido in simulacion.pedidos_disponibles + simulacion.pedidos_no_disponibles + simulacion.pedidos_entregados if pedido.indicador == 1)
-            deliveries_disponibles = sum(1 for pedido in simulacion.pedidos_disponibles + simulacion.pedidos_no_disponibles + simulacion.pedidos_entregados if pedido.indicador != 1)
-            
-            # Calcular proporciones y evitar división por cero
-            pickup_rate = (total_pickups / pickups_disponibles) * 100 if pickups_disponibles > 0 else 0
-            delivery_rate = (total_deliveries / deliveries_disponibles) * 100 if deliveries_disponibles > 0 else 0
-            
-            pickup_rates.append(pickup_rate)
-            delivery_rates.append(delivery_rate)
+        simulacion = EstadoSimulacion2(minuto_inicial=520, puntos=points, indicadores=indicadores, arribos_por_minuto=arribos_por_minuto)
+        camiones = [Camion(id=j+1, tiempo_inicial=0) for j in range(3)]
+        simular_minuto_a_minuto2(
+            simulacion, camiones, mejores_parametros[0], mejores_parametros[1], mejores_parametros[2],
+            pickups, deliveries  # Pasa los valores a las funciones internas
+        )
 
-        # Promedio de las proporciones para el valor actual de `valor_pick`
-        proporcion_pickups.append(sum(pickup_rates) / len(pickup_rates))
-        proporcion_deliveries.append(sum(delivery_rates) / len(delivery_rates))
+        total_pickups = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 1)
+        total_deliveries = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 0)
+        pickups_disponibles = sum(1 for pedido in simulacion.pedidos_disponibles + simulacion.pedidos_no_disponibles + simulacion.pedidos_entregados if pedido.indicador == 1)
+        deliveries_disponibles = sum(1 for pedido in simulacion.pedidos_disponibles + simulacion.pedidos_no_disponibles + simulacion.pedidos_entregados if pedido.indicador != 1)
 
-    # Graficar los resultados
-    plt.figure(figsize=(10, 6))
-    plt.plot(range(2, 10, 2), proporcion_pickups, label='Proporción de Pickups Tomados (%)', marker='o')
-    plt.plot(range(2, 10, 2), proporcion_deliveries, label='Proporción de Deliveries Tomados (%)', marker='s')
-    plt.title("Análisis de Sensibilidad: Proporción de Pickups y Deliveries Tomados")
-    plt.xlabel("Valor de Pick")
-    plt.ylabel("Proporción Tomada (%)")
-    plt.legend()
-    plt.grid()
-    plt.show()
+        # Calcular proporciones y evitar división por cero
+        pickup_rate = (total_pickups / pickups_disponibles) * 100 if pickups_disponibles > 0 else 0
+        delivery_rate = (total_deliveries / deliveries_disponibles) * 100 if deliveries_disponibles > 0 else 0
 
-# Ejecución del análisis de sensibilidad
-analisis_sensibilidad(iteraciones_optuna=150)
+        # Guardar resultados individuales
+        proporcion_pickups.append(pickup_rate)
+        proporcion_deliveries.append(delivery_rate)
+
+        # Guardar proporciones de las iteraciones
+        resultados_pickups_iteraciones.append(pickup_rate)
+        resultados_deliveries_iteraciones.append(delivery_rate)
+
+    # Calcular promedios de las 100 iteraciones
+    promedio_pickups = sum(resultados_pickups_iteraciones) / len(resultados_pickups_iteraciones)
+    promedio_deliveries = sum(resultados_deliveries_iteraciones) / len(resultados_deliveries_iteraciones)
+
+    print(f"Promedios para Pickup = {pickups}, Delivery = {deliveries}:")
+    print(f"  Promedio de Pickups: {promedio_pickups}%")
+    print(f"  Promedio de Deliveries: {promedio_deliveries}%")
+
+    return promedio_pickups, promedio_deliveries
+
+
+# Graficar promedios para diferentes combinaciones
+combinaciones = [
+    (1, 2),
+    (2, 1),
+    (1, 3),
+    (3, 1),
+]
+
+promedios_pickups = []
+promedios_deliveries = []
+etiquetas = []
+
+for pickups, deliveries in combinaciones:
+    promedio_pickups, promedio_deliveries = analisis_sensibilidad(iteraciones_optuna=100, pickups=pickups, deliveries=deliveries)
+    # Aquí ya son valores flotantes, no listas
+    promedios_pickups.append(promedio_pickups)  # Agrega el promedio directamente
+    promedios_deliveries.append(promedio_deliveries)
+    etiquetas.append(f"Pickup={pickups}, Delivery={deliveries}")
+
+# Crear gráfico
+plt.figure(figsize=(12, 6))
+plt.plot(range(len(combinaciones)), promedios_pickups, label='Promedio de Pickups (%)', marker='o')
+plt.plot(range(len(combinaciones)), promedios_deliveries, label='Promedio de Deliveries (%)', marker='s')
+plt.title("Promedio de Proporciones: Pickups vs Deliveries (100 simulaciones por combinación)")
+plt.xticks(range(len(combinaciones)), etiquetas, rotation=45, ha='right')
+plt.xlabel("Combinaciones de Pickup y Delivery")
+plt.ylabel("Promedio de Proporción Tomada (%)")
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
