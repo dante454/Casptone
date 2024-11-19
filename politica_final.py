@@ -305,7 +305,6 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
     # Verificar si el camión está en alguna casa
     for i, tiempo_llegada in enumerate(minutos_de_entrega):
         if tiempo_actual >= tiempo_llegada and tiempo_actual < tiempo_llegada + 3:  # En rango de atención
-                
                 pick_up_nuevos_disponible(camion, parametros, simulacion, i)
                 return 
 
@@ -331,6 +330,7 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
     # Imprimir los nuevos pick-ups disponibles
 
     if nuevos_pickups:
+        
         unvisited = set(range(len(nuevos_pickups))) 
         tiempo_ruta = calcular_tiempo_ruta(camion.rutas[-1], camion.velocidad)
         todos_los_pedidos = simulacion.pedidos_disponibles + simulacion.pedidos_entregados 
@@ -345,15 +345,11 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
         ruta_cam_aux.pop(0)
         ruta_cam_aux.pop(-1)
 
-        # print(ruta_cam_aux)
-        # print()
-        # print(nueva_ruta_aux)
-        # print()
-
-
+        
         # Verificar si son idénticas
         def listas_identicas(lista1, lista2):
-            if len(lista1) != len(lista2):  # Comparar la longitud primero
+            if len(lista1) != len(lista2): 
+                print("Las rutas tienen diferente largo")# Comparar la longitud primero
                 return False
             return all(np.array_equal(arr1, arr2) for arr1, arr2 in zip(lista1, lista2))
 
@@ -361,7 +357,8 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
             print("Se cambio la ruta por nueva solicitud de pick up")
             puntos_nuevos = [
                             punto for punto in nueva_ruta if not any(np.array_equal(punto, p_antiguo) for p_antiguo in camion.rutas[-1])]
-    
+            print(nueva_ruta)
+            print(puntos_nuevos)
             camion.rutas[-1] = nueva_ruta
             actualizar_estado_simulacion(simulacion, puntos_nuevos)
             #pasarle solo los pickups nuevos no la ruta completa
@@ -526,8 +523,8 @@ def cheapest_insertion_adaptacion(
 
                 # Rechazo para "Pick-ups"
                 if (pedidos_totales[point].indicador == 1 and
-                        increase > parametros["max_aumento_distancia"] * (tiempo_total / parametros["tiempo_necesario_pick_up"]) and
-                        tiempo_total < parametros["tiempo_necesario_pick_up"]):
+                        increase > parametros["max_aumento_distancia_en_ruta"] * (minuto_actual / parametros["tiempo_necesario_pick_up_en_ruta"]) and
+                        tiempo_total < parametros["tiempo_necesario_pick_up_en_ruta"]):
                     continue
 
                 # Elegir este punto si el incremento es el menor
@@ -622,11 +619,11 @@ def calculate_arrival_times_adapted(ruta_coords, camion_velocidad, minuto_actual
 
 
 # Parámetros de la simulación (ajustables por Optuna)
-parametros_ventana_1 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016}
+parametros_ventana_1 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
-parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28}
+parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
-parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556}
+parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
 
 
