@@ -64,7 +64,7 @@ def cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, 
                 )
 
                 # Verificar si la ruta temporal cumple con el horizonte de tiempo
-                if total_time_temp > 1020:
+                if total_time_temp > 1019:
                     continue  # No se puede insertar el punto en esta posición
 
                 # Verificar que podemos llegar a todos los puntos antes de que venzan

@@ -69,6 +69,8 @@ def flujo_ruteo(camion, simulacion, parametros):
 
     # 7. Actualizar los pedidos entregados
     actualizar_estado_simulacion(simulacion, ruta)
+    if len(ruta) <= 2:
+        return
 
     # 8. Actualizar el camión con la nueva ruta
     tiempo_ruta = calcular_tiempo_ruta(ruta, camion.velocidad)
@@ -129,7 +131,7 @@ def actualizar_estado_simulacion(simulacion, ruta):
 
 def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3):
     # Inicia la simulación desde las 8:30 AM (minuto 630) hasta las 7:00 PM (1110 minutos)
-    for minuto in range(520, 1020):
+    for minuto in range(520, 1020 + 1):
         simulacion.minuto_actual = minuto
         print(f"Minuto {minuto}: simulando...")
 
@@ -297,16 +299,30 @@ def graficar_beneficio(simulacion):
     plt.show()
 
 def evaluar_incorporacion_pickup(camion, parametros, simulacion):
+    # Verificar si ya se evaluaron los pick-ups para esta ruta
+    if simulacion.minuto_actual < 780:
+        return
+    if camion.pickups_evaluados:
+        return  # No se realiza ninguna acción si ya se evaluaron los pick-ups
+
     ruta_actual = camion.rutas[-1]
-    
+    total_puntos_ruta = len(ruta_actual) - 1  # Excluimos el depósito final
+    punto_medio_index = total_puntos_ruta // 2  # Índice del punto medio
+
     # Obtener solo la lista de tiempos de llegada (primer elemento de la tupla)
     minutos_de_entrega, _ = hora_entrega_pedidos(ruta_actual, [10000, 10000], camion.velocidad, camion.tiempo_inicio_ruta, service_time=3)
     tiempo_actual = simulacion.minuto_actual
-    # Verificar si el camión está en alguna casa
-    for i, tiempo_llegada in enumerate(minutos_de_entrega):
-        if tiempo_actual >= tiempo_llegada and tiempo_actual < tiempo_llegada + 3:  # En rango de atención
-                pick_up_nuevos_disponible(camion, parametros, simulacion, i)
-                return 
+
+    # Verificar si el camión está en el punto medio de la ruta
+    if punto_medio_index < len(minutos_de_entrega):
+        tiempo_llegada_punto_medio = minutos_de_entrega[punto_medio_index]
+        if tiempo_actual >= tiempo_llegada_punto_medio and tiempo_actual < tiempo_llegada_punto_medio + 3:  # En rango de atención del punto medio
+            pick_up_nuevos_disponible(camion, parametros, simulacion, punto_medio_index)
+            camion.pickups_evaluados = True  # Marcar que los pick-ups ya fueron evaluados
+            return
+    else:
+        # Si por alguna razón el índice está fuera de rango, no hacemos nada
+        return
 
 
 
@@ -322,8 +338,9 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
     for pedido in simulacion.pedidos_disponibles:
         if (
             pedido.indicador == 1 and  # Solo pick-ups
-            pedido.disponible == 1 and  # Deben estar disponibles
-            pedido.minuto_llegada >= camion.tiempo_inicio_ruta  # Llegaron después de asignar la ruta
+            pedido.disponible == 1 
+            #and  # Deben estar disponibles
+            #pedido.minuto_llegada >= camion.tiempo_inicio_ruta  # Llegaron después de asignar la ruta
         ):
             nuevos_pickups.append(pedido)
 
@@ -512,8 +529,9 @@ def cheapest_insertion_adaptacion(
         service_time=3
     )
     tiempo_total = tiempo_total_remaining
-
-    while unvisited:
+    p_insertados = 0
+    max_insertados = 1
+    while unvisited and p_insertados < max_insertados:
         min_increase = float('inf')
         best_position = None
         best_point = None
@@ -541,7 +559,7 @@ def cheapest_insertion_adaptacion(
                 )
 
                 # Verificar si cumple con el horizonte de tiempo
-                if total_time_temp > 1020:
+                if total_time_temp > 1019:
                     continue
 
                 # Verificar que todos los puntos pueden atenderse antes de su vencimiento
@@ -579,6 +597,7 @@ def cheapest_insertion_adaptacion(
             unvisited.remove(best_point)
             tiempo_total = best_total_time
             arrival_times = best_arrival_times
+            p_insertados +=1
             print('SE ENCONTRO PUNTO')
         else:
             print('NO HAY PUNTO')

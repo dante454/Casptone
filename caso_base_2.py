@@ -36,6 +36,8 @@ def flujo_ruteo(camion, simulacion, minuto_actual):
 
     ruta = eliminar_puntos_si_reducen_distancia(ruta, simulacion)
     # 7. Actualizar los pedidos entregados
+    if len(ruta) <= 2:
+        return
     actualizar_estado_simulacion(simulacion, ruta)
 
     # 8. Actualizar el camión con la nueva ruta

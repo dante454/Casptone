@@ -119,6 +119,7 @@ class Camion:
         self.rutas = []  # Almacena todas las rutas realizadas por el camión
         self.tiempo_inicio_ruta = None
         self.posicion_actual = None
+        self.pickups_evaluados = False
         
 
     def actualizar_tiempo(self):
@@ -131,6 +132,7 @@ class Camion:
         self.rutas.append(ruta)  # Agregar la ruta realizada a la lista de rutas
         self.tiempo_restante = tiempo_ruta
         self.tiempo_inicio_ruta = tiempo_inicio  # Registrar el tiempo de inicio de la ruta
+        self.pickups_evaluados = False
         print(f"Camión {self.id} asignado a una nueva ruta, tiempo de ruta: {tiempo_ruta} minutos")
         
     def actualizar_posicion(self, minuto_actual):
