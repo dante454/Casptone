@@ -335,7 +335,7 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
         tiempo_ruta = calcular_tiempo_ruta(camion.rutas[-1], camion.velocidad)
         todos_los_pedidos = simulacion.pedidos_disponibles + simulacion.pedidos_entregados 
 
-        nueva_ruta = cheapest_insertion_adaptacion(simulacion.minuto_actual, tiempo_ruta, parametros, camion, current_index, nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=180)
+        nueva_ruta = cheapest_insertion_adaptacion(simulacion.minuto_actual, parametros, camion, current_index, nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=180)
         nueva_ruta_aux = nueva_ruta.copy()
         ruta_cam_aux = camion.rutas[-1].copy()
 
@@ -353,14 +353,29 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
                 return False
             return all(np.array_equal(arr1, arr2) for arr1, arr2 in zip(lista1, lista2))
 
-        if  not listas_identicas(nueva_ruta_aux, ruta_cam_aux):
-            print("Se cambio la ruta por nueva solicitud de pick up")
+        if not listas_identicas(nueva_ruta_aux, ruta_cam_aux):
+            print("Se cambió la ruta por nueva solicitud de pick up")
             puntos_nuevos = [
-                            punto for punto in nueva_ruta if not any(np.array_equal(punto, p_antiguo) for p_antiguo in camion.rutas[-1])]
+                punto for punto in nueva_ruta if not any(np.array_equal(punto, p_antiguo) for p_antiguo in camion.rutas[-1])]
             print(nueva_ruta)
             print(puntos_nuevos)
             camion.rutas[-1] = nueva_ruta
             actualizar_estado_simulacion(simulacion, puntos_nuevos)
+            
+            # Calcular el nuevo tiempo total de la ruta actualizada
+            _, tiempo_total_nueva_ruta = calculate_arrival_times_adapted(
+                nueva_ruta,
+                camion.velocidad,
+                camion.tiempo_inicio_ruta,
+                [10000, 10000],
+                service_time=3
+            )
+            
+            # Actualizar el tiempo restante del camión
+            camion.tiempo_restante = tiempo_total_nueva_ruta - simulacion.minuto_actual
+            if camion.tiempo_restante < 0:
+                camion.tiempo_restante = 0 
+            
             #pasarle solo los pickups nuevos no la ruta completa
 
     else:
@@ -444,16 +459,27 @@ def registrar_tiempos_delivery(simulacion, camiones):
 
 
 def cheapest_insertion_adaptacion(
-    minuto_actual, tiempo_total, parametros, camion, current_index, pedidos_validos, ruta_actual, todos_los_pedidos, tiempo_limite=180
+    minuto_actual, parametros, camion, current_index, pedidos_validos, ruta_actual, todos_los_pedidos, tiempo_limite=180
 ):
-    # Lista de pedidos ya en la ruta actual (desde current_index hasta el final)
-    pedidos_en_ruta = []
+    # Obtener la ubicación y el tiempo actual del camión
+    current_location = ruta_actual[current_index]
+    
+    # Calcular el tiempo de llegada al punto actual
+    arrival_times_up_to_current, _ = calculate_arrival_times_adapted(
+        ruta_actual[:current_index + 1],
+        camion.velocidad,
+        camion.tiempo_inicio_ruta,
+        [10000, 10000],
+        service_time=3
+    )
+    current_time = arrival_times_up_to_current[-1] + 3  # Añadir tiempo de servicio en el punto actual
 
-    # Limitar la ruta actual a partir del índice actual y excluir el depósito
-    ruta_actual_aux = ruta_actual[current_index:]
+
+    # Lista de pedidos ya en la ruta actual (desde current_index + 1 hasta el final)
+    ruta_actual_aux = ruta_actual[current_index + 1:]
     ruta_actual_aux = [cord for cord in ruta_actual_aux if not np.array_equal(cord, [10000, 10000])]
 
-    # Recopilar pedidos ya presentes en la ruta actual
+    pedidos_en_ruta = []
     for cord in ruta_actual_aux:
         pedidos_en_punto = [pedido for pedido in todos_los_pedidos if np.array_equal(pedido.coordenadas, cord)]
         if pedidos_en_punto:
@@ -470,13 +496,22 @@ def cheapest_insertion_adaptacion(
     # Mapear pedidos a sus índices en pedidos_totales
     pedido_a_indice = {pedido: idx for idx, pedido in enumerate(pedidos_totales)}
 
-    # Indices de los pedidos ya en la ruta (inicialmente)
+    # Índices de los pedidos ya en la ruta (inicialmente)
     indices_route = [pedido_a_indice[pedido] for pedido in pedidos_en_ruta]
 
-    # Indices de los nuevos pedidos a considerar para inserción
+    # Índices de los nuevos pedidos a considerar para inserción
     unvisited = [pedido_a_indice[pedido] for pedido in pedidos_validos if pedido not in pedidos_en_ruta]
 
-    ruta_inicial = ruta_actual[:current_index]  # Parte inicial de la ruta antes de current_index
+    # Calcular el tiempo total restante sin nuevos pickups
+    ruta_remaining_coords = [pedido.coordenadas for pedido in pedidos_en_ruta]
+    arrival_times_remaining, tiempo_total_remaining = calculate_arrival_times_adapted(
+        ruta_remaining_coords,
+        camion.velocidad,
+        minuto_actual,
+        current_location,
+        service_time=3
+    )
+    tiempo_total = tiempo_total_remaining
 
     while unvisited:
         min_increase = float('inf')
@@ -487,19 +522,22 @@ def cheapest_insertion_adaptacion(
 
         # Buscar el mejor punto para insertar
         for point in unvisited:
-            # Evitar insertar el mismo punto más de una vez
             if point in indices_route:
                 continue
-            for i in range(len(indices_route) + 1):  # Posibles posiciones para insertar
+            for i in range(len(indices_route) + 1):
                 ruta_temporal = indices_route.copy()
                 ruta_temporal.insert(i, point)
 
-                # Construir la ruta completa temporal con coordenadas
-                ruta_compl_temp_coords = ruta_inicial + [pedidos_totales[idx].coordenadas for idx in ruta_temporal] + [[10000, 10000]]
+                # Construir la ruta completa temporal
+                ruta_compl_temp_coords = [current_location] + [pedidos_totales[idx].coordenadas for idx in ruta_temporal]
 
                 # Calcular tiempos de llegada y tiempo total de la ruta
                 arrival_times_temp, total_time_temp = calculate_arrival_times_adapted(
-                    ruta_compl_temp_coords, camion.velocidad, minuto_actual, service_time=3
+                    ruta_compl_temp_coords,
+                    camion.velocidad,
+                    minuto_actual,
+                    current_location,
+                    service_time=3
                 )
 
                 # Verificar si cumple con el horizonte de tiempo
@@ -543,22 +581,18 @@ def cheapest_insertion_adaptacion(
             arrival_times = best_arrival_times
             print('SE ENCONTRO PUNTO')
         else:
-            # No se puede insertar ningún otro punto
             print('NO HAY PUNTO')
             break
 
     # Construir la ruta final
-    ruta_final_coords = ruta_inicial + [pedidos_totales[idx].coordenadas for idx in indices_route] + [[10000, 10000]]
+    ruta_final_coords = ruta_actual[:current_index + 1] + [pedidos_totales[idx].coordenadas for idx in indices_route] + [[10000, 10000]]
     return ruta_final_coords
 
-
-def calculate_arrival_times_adapted(ruta_coords, camion_velocidad, minuto_actual, service_time=3):
+def calculate_arrival_times_adapted(ruta_coords, camion_velocidad, current_time, current_location, service_time=3):
     arrival_times = []
-    current_time = minuto_actual
-    current_location = [10000, 10000]  # Suponiendo que el depósito está en estas coordenadas
 
-    # Para cada punto en la ruta (excluyendo el depósito final)
-    for coord in ruta_coords[:-1]:
+    # Para cada punto en la ruta
+    for coord in ruta_coords:
         next_location = coord
 
         # Calcular el tiempo de viaje al siguiente punto
@@ -568,7 +602,7 @@ def calculate_arrival_times_adapted(ruta_coords, camion_velocidad, minuto_actual
         # Tiempo de llegada al siguiente punto
         arrival_time = current_time + travel_time
 
-        # Almacenar el tiempo de llegada (antes del servicio)
+        # Almacenar el tiempo de llegada
         arrival_times.append(arrival_time)
 
         # Actualizar el tiempo actual sumando el tiempo de atención
@@ -582,7 +616,7 @@ def calculate_arrival_times_adapted(ruta_coords, camion_velocidad, minuto_actual
     travel_time = distance / camion_velocidad
     current_time += travel_time  # Sumar tiempo para regresar al depósito
 
-    return arrival_times, current_time  # Retorna los tiempos de llegada y el tiempo total
+    return arrival_times, current_time # Retorna los tiempos de llegada y el tiempo total
 
 
 #parametros con 1000 it optuna.
