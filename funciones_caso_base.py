@@ -198,29 +198,35 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
     colores_camiones = ["cyan", "magenta", "orange"]
     velocidad_camion = ((25 * 1000) / 60)  # 25 km/h convertidos a metros por minuto
 
-
     # Función para actualizar cada cuadro de la animación
     def actualizar(frame):
         ax.clear()
         ax.set_xlim(0, 20000)
         ax.set_ylim(0, 20000)
         ax.set_title(f"Minuto {simulacion.registro_minuto_a_minuto[frame]['minuto']}")
-        ax.scatter(10000, 10000, c="black", s=50, label="Depósito")  # Depósito en negro
+        ax.scatter(10000, 10000, c="black", s=50, label="Depósito", marker='D')  # Depósito como diamante negro
 
         estado = simulacion.registro_minuto_a_minuto[frame]
 
         # Graficar pedidos
         for pedido in estado["pedidos"]:
             x, y = pedido["coordenadas"]
-            if pedido["entregado"]:
-                ax.plot(x, y, 'go')  # Pedido entregado en verde
-            elif pedido["estado"] == "Disponible":
-                if estado["minuto"] - pedido["minuto_llegada"] > 180:  # Pedidos vencidos
-                    ax.plot(x, y, 'mo')  # Pedido vencido en magenta
+
+            if x == 10000 and y == 10000:
+                continue
+
+            if pedido["tipo"] == "Pick-up":
+                ax.plot(x, y, 'yo')  # Amarillo para pickups (siempre)
+            elif pedido["tipo"] == "Delivery":
+                if pedido["entregado"]:
+                    ax.plot(x, y, 'go')  # Verde para entregados
+                elif pedido["estado"] == "Disponible":
+                    if estado["minuto"] - pedido["minuto_llegada"] > 180:  # Delivery vencido
+                        ax.plot(x, y, 'mo')  # Magenta para vencidos
+                    else:
+                        ax.plot(x, y, 'bo')  # Azul para disponibles
                 else:
-                    ax.plot(x, y, 'bo')  # Pedido disponible en azul
-            else:
-                ax.plot(x, y, 'ro')  # Pedido no disponible en rojo
+                    ax.plot(x, y, 'ro')  # Rojo para no disponibles
 
         # Graficar camiones y sus rutas
         for i, camion in enumerate(estado["camiones"]):
@@ -237,7 +243,19 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
                 # Graficar la posición actual del camión en su color asignado
                 ax.scatter(posicion_actual[0], posicion_actual[1], c=colores_camiones[i], s=70, label=f"Camión {camion['id']}")
 
-        ax.legend()
+        # Añadir la leyenda
+        leyenda_colores = [
+            ("Depósito", "black", "D"),
+            ("Pick-up", "yellow", "o"),
+            ("Delivery disponible", "blue", "o"),
+            ("Delivery entregado", "green", "o"),
+            ("Delivery vencido", "magenta", "o"),
+            ("Delivery no disponible", "red", "o"),
+        ]
+        for label, color, marker in leyenda_colores:
+            ax.scatter([], [], c=color, marker=marker, label=label)  # Elemento vacío para la leyenda
+
+        ax.legend(loc="upper right")
 
     # Crear la animación
     anim = animation.FuncAnimation(fig, actualizar, frames=len(simulacion.registro_minuto_a_minuto), interval=100)
@@ -245,6 +263,10 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
     # Guardar el GIF
     anim.save(archivo_gif, writer="pillow")
     print(f"GIF creado: {archivo_gif}")
+
+
+
+
 
 
 
