@@ -120,6 +120,7 @@ class Camion:
         self.tiempo_inicio_ruta = None
         self.posicion_actual = None
         self.pickups_evaluados = False
+        self.pickups_actuales = 0
         
 
     def actualizar_tiempo(self):
@@ -263,6 +264,50 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
     # Guardar el GIF
     anim.save(archivo_gif, writer="pillow")
     print(f"GIF creado: {archivo_gif}")
+
+
+
+def generar_mapa_calor_rutas(simulacion, grid_size=100, archivo_png="heatmap_rutas.png"):
+    # Dimensiones del mapa
+    mapa_dim = 20000
+    heatmap = np.zeros((mapa_dim // grid_size, mapa_dim // grid_size))
+
+    # Iterar sobre los camiones y sus rutas
+    for estado in simulacion.registro_minuto_a_minuto:
+        for camion in estado["camiones"]:
+            for ruta in camion["rutas_realizadas"]:
+                for punto in ruta:
+                    x, y = punto
+
+                    # Ignorar el depósito
+                    if x == 10000 and y == 10000:
+                        continue
+
+                    # Convertir coordenadas a índices del heatmap
+                    i, j = int(y // grid_size), int(x // grid_size)
+                    if 0 <= i < heatmap.shape[0] and 0 <= j < heatmap.shape[1]:
+                        heatmap[i, j] += 1
+
+    # Normalizar el heatmap para que los valores estén entre 0 y 1
+    if heatmap.max() > 0:
+        heatmap = heatmap / heatmap.max()
+
+    # Graficar el mapa de calor
+    plt.figure(figsize=(10, 10))
+    plt.imshow(heatmap, cmap="Reds", origin="lower", extent=[0, mapa_dim, 0, mapa_dim])
+    plt.colorbar(label="Frecuencia de paso")
+    plt.title("Mapa de Calor: Frecuencia de paso de los camiones")
+    plt.xlabel("Coordenadas X")
+    plt.ylabel("Coordenadas Y")
+    plt.savefig(archivo_png)
+    plt.show()
+
+    print(f"Mapa de calor guardado en {archivo_png}")
+
+
+
+
+
 
 
 

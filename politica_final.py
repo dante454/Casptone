@@ -62,21 +62,27 @@ def flujo_ruteo(camion, simulacion, parametros):
     # 3. Separar los pedidos según su área y seleccionar el área con más pedidos
     pedidos_a_rutear = separar_y_seleccionar_area(pedidos_disponibles)
 
-    depot=[10000, 10000]
+    depot = [10000, 10000]
     # 4. Generar la ruta según los pedidos en el área con más pedidos
     ruta = generar_ruta(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, tiempo_limite=180)
 
+    # Si no hay puntos en la ruta, no hacer nada
+    if len(ruta) <= 2:
+        return
+
+    # Reiniciar el contador de pickups dinámicos para la nueva ruta
+    camion.pickups_actuales = 0
 
     # 7. Actualizar los pedidos entregados
     actualizar_estado_simulacion(simulacion, ruta)
-    if len(ruta) <= 2:
-        return
 
     # 8. Actualizar el camión con la nueva ruta
     tiempo_ruta = calcular_tiempo_ruta(ruta, camion.velocidad)
     camion.asignar_ruta(ruta, tiempo_ruta, simulacion.minuto_actual)
+
     # 9. Devolver la ruta y el tiempo de la ruta
     return ruta, tiempo_ruta
+
 
 
 def asignar_area(punto, parametros):
@@ -199,65 +205,12 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
     print(f"Cantidad de deliveries realizados: {cantidad_deliveries}")
 
     print()
-    # Análisis dentro de rutas individuales y entre rutas del mismo camión
-    # for camion in camiones:
-    #     print(f"Analizando repeticiones para el Camión {camion.id}:")
-
-    #     # Verificar repeticiones dentro de cada ruta
-    #     for i, ruta in enumerate(camion.rutas):
-    #         # Excluir el depósito del análisis
-    #         puntos_unicos = set(tuple(punto) for punto in ruta if not np.array_equal(punto, [10000, 10000]))
-    #         ruta_filtrada = [punto for punto in ruta if not np.array_equal(punto, [10000, 10000])]
-    #         if len(puntos_unicos) < len(ruta_filtrada):
-    #             print(f"  Ruta {i + 1} tiene puntos repetidos dentro de sí misma (excluyendo el depósito).")
-    #         else:
-    #             print(f"  Ruta {i + 1} no tiene puntos repetidos dentro de sí misma (excluyendo el depósito).")
-
-    #     # Verificar repeticiones entre rutas
-    #     puntos_todas_rutas = set()
-    #     puntos_repetidos = set()
-    #     for ruta in camion.rutas:
-    #         for punto in ruta:
-    #             if np.array_equal(punto, [10000, 10000]):
-    #                 continue  # Ignorar el depósito
-    #             punto_tuple = tuple(punto)
-    #             if punto_tuple in puntos_todas_rutas:
-    #                 puntos_repetidos.add(punto_tuple)
-    #             else:
-    #                 puntos_todas_rutas.add(punto_tuple)
-
-    #     if puntos_repetidos:
-    #         print(f"  Hay puntos repetidos entre rutas (excluyendo el depósito): {puntos_repetidos}")
-    #     else:
-    #         print("  No hay puntos repetidos entre rutas (excluyendo el depósito).")
-
-    # # Comparación entre camiones
-    # print("\nComparación de puntos entre camiones (excluyendo el depósito):")
-    # puntos_por_camion = {}  # Diccionario para almacenar los puntos visitados por cada camión
-
-    # # Recopilar puntos visitados por cada camión, excluyendo el depósito
-    # for camion in camiones:
-    #     puntos_visitados = set(tuple(punto) for ruta in camion.rutas for punto in ruta if not np.array_equal(punto, [10000, 10000]))
-    #     puntos_por_camion[camion.id] = puntos_visitados
-
-    # # Comparar puntos entre camiones
-    # for id1, puntos_camion1 in puntos_por_camion.items():
-    #     for id2, puntos_camion2 in puntos_por_camion.items():
-    #         if id1 < id2:  # Evitar comparaciones duplicadas
-    #             puntos_repetidos = puntos_camion1 & puntos_camion2  # Intersección de puntos
-    #             if puntos_repetidos:
-    #                 print(f"  Camión {id1} y Camión {id2} tienen puntos repetidos: {puntos_repetidos}")
-    #             else:
-    #                 print(f"  Camión {id1} y Camión {id2} no tienen puntos repetidos.")
-    
-    # Verificar si hay pedidos repetidos en los pedidos entregados
-    # 
 
 # Al final de la simulación
     
     
-    #graficar_rutas_y_puntos(camiones, simulacion)
-    #graficar_beneficio(simulacion)
+    graficar_rutas_y_puntos(camiones, simulacion)
+    graficar_beneficio(simulacion)
 
 def verificar_pedidos_repetidos(pedidos_entregados):
     print(len(pedidos_entregados))
@@ -299,9 +252,15 @@ def graficar_beneficio(simulacion):
     plt.show()
 
 def evaluar_incorporacion_pickup(camion, parametros, simulacion):
-    # Verificar si ya se evaluaron los pick-ups para esta ruta
-    if simulacion.minuto_actual < 780:
+    # Límite de pickups dinámicos permitidos por ruta
+    max_pickups_dinamicos = 5
+
+    # Verificar si ya se alcanzó el límite de pickups dinámicos
+    if camion.pickups_actuales >= max_pickups_dinamicos:
+        print(f"Camión {camion.id}: Límite de {max_pickups_dinamicos} pickups dinámicos alcanzado para esta ruta.")
         return
+
+    # Verificar si ya se evaluaron los pick-ups para esta ruta
     if camion.pickups_evaluados:
         return  # No se realiza ninguna acción si ya se evaluaron los pick-ups
 
@@ -317,8 +276,17 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
     if punto_medio_index < len(minutos_de_entrega):
         tiempo_llegada_punto_medio = minutos_de_entrega[punto_medio_index]
         if tiempo_actual >= tiempo_llegada_punto_medio and tiempo_actual < tiempo_llegada_punto_medio + 3:  # En rango de atención del punto medio
-            pick_up_nuevos_disponible(camion, parametros, simulacion, punto_medio_index)
-            camion.pickups_evaluados = True  # Marcar que los pick-ups ya fueron evaluados
+            # Llamar a la función para añadir pickups dinámicos
+            nueva_ruta = pick_up_nuevos_disponible(camion, parametros, simulacion, punto_medio_index)
+            
+            # Contar los pickups añadidos dinámicamente
+            if nueva_ruta:
+                nuevos_pickups = len(nueva_ruta) - len(camion.rutas[-1])
+                camion.pickups_actuales += nuevos_pickups
+                print(f"Camión {camion.id}: Se añadieron {nuevos_pickups} pickups dinámicos. Total actuales: {camion.pickups_actuales}")
+
+            # Marcar que los pick-ups ya fueron evaluados para esta ruta
+            camion.pickups_evaluados = True
             return
     else:
         # Si por alguna razón el índice está fuera de rango, no hacemos nada
@@ -326,77 +294,79 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
 
 
 
+
+
+
 def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
+    # Límite de pickups dinámicos permitidos por ruta
+    max_pickups_dinamicos = 5
+
+    # Verificar si se ha alcanzado el límite
+    if camion.pickups_actuales >= max_pickups_dinamicos:
+        print(f"Camión {camion.id}: Límite de {max_pickups_dinamicos} pickups dinámicos alcanzado.")
+        return camion.rutas[-1]  # Devolver la ruta actual sin cambios
+
     # Verificar si hay pedidos disponibles
     if not simulacion.pedidos_disponibles:
         print(f"No hay solicitudes de pick-up disponibles en el minuto {simulacion.minuto_actual}.")
-        return
+        return camion.rutas[-1]  # Devolver la ruta actual sin cambios
 
     nuevos_pickups = []
 
-    # Revisar los pedidos disponibles para identificar los nuevos pick-ups
+    # Identificar los nuevos pick-ups disponibles
     for pedido in simulacion.pedidos_disponibles:
-        if (
-            pedido.indicador == 1 and  # Solo pick-ups
-            pedido.disponible == 1 
-            #and  # Deben estar disponibles
-            #pedido.minuto_llegada >= camion.tiempo_inicio_ruta  # Llegaron después de asignar la ruta
-        ):
+        if pedido.indicador == 1 and pedido.disponible == 1:  # Solo pick-ups disponibles
             nuevos_pickups.append(pedido)
 
-    # Imprimir los nuevos pick-ups disponibles
-
+    # Si hay nuevos pickups disponibles, verificar límite antes de proceder
     if nuevos_pickups:
-        
-        unvisited = set(range(len(nuevos_pickups))) 
-        tiempo_ruta = calcular_tiempo_ruta(camion.rutas[-1], camion.velocidad)
-        todos_los_pedidos = simulacion.pedidos_disponibles + simulacion.pedidos_entregados 
+        # Verificar cuántos pickups más podemos agregar
+        pickups_restantes = max_pickups_dinamicos - camion.pickups_actuales
+        nuevos_pickups = nuevos_pickups[:pickups_restantes]  # Limitar la lista a lo permitido
 
-        nueva_ruta = cheapest_insertion_adaptacion(simulacion.minuto_actual, parametros, camion, current_index, nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=180)
-        nueva_ruta_aux = nueva_ruta.copy()
-        ruta_cam_aux = camion.rutas[-1].copy()
+        # Calcular la nueva ruta con los pickups seleccionados
+        unvisited = set(range(len(nuevos_pickups)))
+        todos_los_pedidos = simulacion.pedidos_disponibles + simulacion.pedidos_entregados
+        nueva_ruta = cheapest_insertion_adaptacion(
+            simulacion.minuto_actual, parametros, camion, current_index,
+            nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=180
+        )
 
-        nueva_ruta_aux.pop(0)
-        nueva_ruta_aux.pop(-1)
-
-        ruta_cam_aux.pop(0)
-        ruta_cam_aux.pop(-1)
-
-        
-        # Verificar si son idénticas
+        # Comparar la nueva ruta con la actual
         def listas_identicas(lista1, lista2):
-            if len(lista1) != len(lista2): 
-                print("Las rutas tienen diferente largo")# Comparar la longitud primero
+            if len(lista1) != len(lista2):
+                print("Las rutas tienen diferente largo")
                 return False
             return all(np.array_equal(arr1, arr2) for arr1, arr2 in zip(lista1, lista2))
 
-        if not listas_identicas(nueva_ruta_aux, ruta_cam_aux):
+        # Si la nueva ruta tiene cambios, actualizamos la ruta del camión
+        if not listas_identicas(nueva_ruta, camion.rutas[-1]):
             print("Se cambió la ruta por nueva solicitud de pick up")
             puntos_nuevos = [
-                punto for punto in nueva_ruta if not any(np.array_equal(punto, p_antiguo) for p_antiguo in camion.rutas[-1])]
-            print(nueva_ruta)
-            print(puntos_nuevos)
+                punto for punto in nueva_ruta if not any(np.array_equal(punto, p_antiguo) for p_antiguo in camion.rutas[-1])
+            ]
             camion.rutas[-1] = nueva_ruta
             actualizar_estado_simulacion(simulacion, puntos_nuevos)
-            
-            # Calcular el nuevo tiempo total de la ruta actualizada
+
+            # Incrementar el conteo de pickups actuales del camión
+            camion.pickups_actuales += len(nuevos_pickups)
+            print(f"Camión {camion.id}: Se agregaron {len(nuevos_pickups)} pickups. Total pickups dinámicos: {camion.pickups_actuales}")
+
+            # Calcular el nuevo tiempo restante
             _, tiempo_total_nueva_ruta = calculate_arrival_times_adapted(
-                nueva_ruta,
-                camion.velocidad,
-                camion.tiempo_inicio_ruta,
-                [10000, 10000],
-                service_time=3
+                nueva_ruta, camion.velocidad, camion.tiempo_inicio_ruta, [10000, 10000], service_time=3
             )
-            
-            # Actualizar el tiempo restante del camión
-            camion.tiempo_restante = tiempo_total_nueva_ruta - simulacion.minuto_actual
-            if camion.tiempo_restante < 0:
-                camion.tiempo_restante = 0 
-            
-            #pasarle solo los pickups nuevos no la ruta completa
+            camion.tiempo_restante = max(0, tiempo_total_nueva_ruta - simulacion.minuto_actual)
+
+        return camion.rutas[-1]  # Devolver la nueva ruta actualizada
 
     else:
         print(f"No hay nuevas solicitudes de pick-up disponibles en el minuto {simulacion.minuto_actual}.")
+        return camion.rutas[-1]  # Devolver la ruta actual sin cambios
+
+
+
+
     
 
 def hora_entrega_pedidos(ruta, depot, camion_velocidad, minuto_actual, service_time=3):
@@ -578,10 +548,14 @@ def cheapest_insertion_adaptacion(
                 increase = total_time_temp - tiempo_total
 
                 # Rechazo para "Pick-ups"
-                if (pedidos_totales[point].indicador == 1 and
-                        increase > parametros["max_aumento_distancia_en_ruta"] * (minuto_actual / parametros["tiempo_necesario_pick_up_en_ruta"]) and
-                        tiempo_total < parametros["tiempo_necesario_pick_up_en_ruta"]):
-                    continue
+                # Verificar que ningún delivery planeado sea afectado por la inserción del pickup
+                if pedidos_totales[point].indicador == 1:  # Pickup
+                    if any(
+                        pedidos_totales[idx].indicador == 0 and arrival_time > pedidos_totales[idx].minuto_llegada + tiempo_limite
+                        for idx, arrival_time in zip(ruta_temporal, arrival_times_temp)
+                    ):
+                        continue  # Rechazar la inserción si afecta algún delivery
+
 
                 # Elegir este punto si el incremento es el menor
                 if increase < min_increase:
@@ -713,3 +687,4 @@ registrar_tiempos_delivery(simulacion, camiones)
 
 # Llamar a la función para crear el GIF
 crear_gif_con_movimiento_camiones(simulacion)
+#generar_mapa_calor_rutas(simulacion)
