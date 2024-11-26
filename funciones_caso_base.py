@@ -17,6 +17,8 @@ class EstadoSimulacion:
         self.punto_index = 0 # Para mantener el control sobre los puntos que vamos usand
         self.beneficio_por_intervalo = [] 
         self.registro_minuto_a_minuto = []
+        self.pickups_intervalos = []
+        self.deliveries_intervalos = []
 
 
     def avanzar_minuto(self):

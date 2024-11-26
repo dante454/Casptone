@@ -136,7 +136,7 @@ def actualizar_estado_simulacion(simulacion, ruta):
     simulacion.pedidos_disponibles = [pedido for pedido in simulacion.pedidos_disponibles if pedido not in pedidos_a_entregar]
 
 def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3):
-    # Inicia la simulación desde las 8:30 AM (minuto 630) hasta las 7:00 PM (1110 minutos)
+    
     for minuto in range(520, 1020 + 1):
         simulacion.minuto_actual = minuto
         print(f"Minuto {minuto}: simulando...")
@@ -161,11 +161,34 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
                 # Gestionar el camión cuando sale a realizar una ruta
                 flujo_ruteo(camion, simulacion, parametros)
         
-        # Cada 30 minutos, calcular el porcentaje de beneficio captado
-        if minuto % 30 == 0:
+        # Cada 10 minutos, calcular el porcentaje de beneficio captado
+        if minuto % 10 == 0:
             beneficio_acumulado = simulacion.calcular_beneficio_acumulado()
             porcentaje_beneficio = simulacion.calcular_porcentaje_beneficio(beneficio_acumulado)
             simulacion.beneficio_por_intervalo.append((minuto, porcentaje_beneficio))
+
+            pedidos_totales = simulacion.pedidos_disponibles + simulacion.pedidos_entregados + simulacion.pedidos_no_disponibles
+
+            total_deliveries = sum(1 for pedido in pedidos_totales if pedido.indicador == 0)
+            total_pickups = sum(1 for pedido in pedidos_totales if pedido.indicador == 1)
+
+            completados_deliveries = sum(
+                1 for pedido in simulacion.pedidos_entregados
+                if pedido.indicador == 0 and pedido.tiempo_entrega <= minuto
+            )
+            completados_pickups = sum(
+                1 for pedido in simulacion.pedidos_entregados
+                if pedido.indicador == 1 and pedido.tiempo_entrega <= minuto
+            )
+
+            porcentaje_deliveries = (completados_deliveries / total_deliveries) * 100 if total_deliveries > 0 else 0
+            porcentaje_pickups = (completados_pickups / total_pickups) * 100 if total_pickups > 0 else 0
+
+            # Guardar los porcentajes en los atributos de simulación
+            simulacion.deliveries_intervalos.append((minuto, porcentaje_deliveries))
+            simulacion.pickups_intervalos.append((minuto, porcentaje_pickups))
+
+
 
         # Avanza el minuto en la simulación
         simulacion.avanzar_minuto()
@@ -209,8 +232,8 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
 # Al final de la simulación
     
     
-    graficar_rutas_y_puntos(camiones, simulacion)
-    graficar_beneficio(simulacion)
+    #graficar_rutas_y_puntos(camiones, simulacion)
+    #graficar_beneficio(simulacion)
 
 def verificar_pedidos_repetidos(pedidos_entregados):
     print(len(pedidos_entregados))
@@ -295,8 +318,6 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
 
 
 
-
-
 def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
     # Límite de pickups dinámicos permitidos por ruta
     max_pickups_dinamicos = 5
@@ -367,7 +388,7 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
 
 
 
-    
+
 
 def hora_entrega_pedidos(ruta, depot, camion_velocidad, minuto_actual, service_time=3):
     arrival_times = []
@@ -674,17 +695,9 @@ camiones = [
 
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
-registrar_tiempos_delivery(simulacion, camiones)
+#registrar_tiempos_delivery(simulacion, camiones)
 
-#pedidos_repetidos = verificar_pedidos_repetidos(simulacion.pedidos_entregados)
-    
-# if pedidos_repetidos:
-#         print("Se encontraron pedidos repetidos en los entregados:")
-#         for pedido in pedidos_repetidos:
-#             print(f"Pedido repetido en coordenadas: {pedido.coordenadas}")
-# else:
-#         print("No se encontraron pedidos repetidos en los entregados.")
 
 # Llamar a la función para crear el GIF
-crear_gif_con_movimiento_camiones(simulacion)
+#crear_gif_con_movimiento_camiones(simulacion)
 #generar_mapa_calor_rutas(simulacion)

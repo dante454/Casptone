@@ -53,6 +53,9 @@ tiempos_promedio_entrega = []
 pickups_completados = []
 deliveries_completados = []
 numero_rutas = []
+beneficio_intervalos =[]
+deliveries_por_intervalo = []
+pickups_por_intervalo = []
 
 # Ejecutar la simulación para cada uno de los 100 días
 for dia in range(100):
@@ -96,12 +99,17 @@ for dia in range(100):
     rutas = sum(len(camion.rutas) for camion in camiones )
 
 
+
     tiempos_promedio_entrega.append(tiempo_respuesta_promedio)
     beneficios.append(beneficio_total)
     distancias_totales.append(distancia_total)
     pickups_completados.append(cantidad_pickups)
     deliveries_completados.append(cantidad_deliveries)
     numero_rutas.append(rutas)
+    beneficio_intervalos.append(simulacion.beneficio_por_intervalo)
+    deliveries_por_intervalo.append(simulacion.deliveries_intervalos)
+    pickups_por_intervalo.append(simulacion.pickups_intervalos)
+
 
 
 #calcualr % minimo y maximo obtenido
@@ -118,6 +126,7 @@ delivery_promedio = sum(deliveries_completados) / len(deliveries_completados)
 rutas_promedio = sum(numero_rutas) / len(numero_rutas)
 largo_rutas_prom = distancia_promedio / rutas_promedio
 
+
 # Mostrar los resultados
 print('\n', '--'*16)
 print("\nResultados de la Simulación de 100 Días:\n")
@@ -131,3 +140,70 @@ print(f"Deliveries Completados Promedio: {delivery_promedio}")
 print(f'Largo de ruta promedio: {largo_rutas_prom}')
 print(f'Rutas promedio {rutas_promedio}')
 
+intervalos_agrupados = {}
+for dia in beneficio_intervalos:
+    for minuto, beneficio in dia:
+        if minuto not in intervalos_agrupados:
+            intervalos_agrupados[minuto] = []
+        intervalos_agrupados[minuto].append(beneficio)
+
+# Paso 2: Calcular el promedio por minuto
+minutos = sorted(intervalos_agrupados.keys())
+promedio_beneficio_por_minuto = [
+    np.mean(intervalos_agrupados[minuto]) for minuto in minutos
+]
+
+# Paso 3: Graficar los resultados
+plt.figure(figsize=(10, 6))
+plt.plot(minutos, promedio_beneficio_por_minuto, marker="o", label="Beneficio Promedio")
+plt.title("Tendencia del Beneficio Promedio por Intervalo de Tiempo")
+plt.xlabel("Minuto")
+plt.ylabel("Beneficio (%)")
+plt.grid(True, linestyle="--", alpha=0.7)
+plt.legend()
+plt.tight_layout()
+
+# Mostrar el gráfico
+plt.show()
+
+intervalos_deliveries_agrupados = {}
+intervalos_pickups_agrupados = {}
+
+for dia in deliveries_por_intervalo:
+    for minuto, porcentaje_delivery in dia:
+        if minuto not in intervalos_deliveries_agrupados:
+            intervalos_deliveries_agrupados[minuto] = []
+        intervalos_deliveries_agrupados[minuto].append(porcentaje_delivery)
+
+for dia in pickups_por_intervalo:
+    for minuto, porcentaje_pickup in dia:
+        if minuto not in intervalos_pickups_agrupados:
+            intervalos_pickups_agrupados[minuto] = []
+        intervalos_pickups_agrupados[minuto].append(porcentaje_pickup)
+
+# Paso 2: Calcular el promedio por intervalo
+minutos = sorted(intervalos_deliveries_agrupados.keys())  # Usamos los mismos minutos para ambos porcentajes
+promedio_deliveries_por_minuto = [
+    sum(intervalos_deliveries_agrupados[minuto]) / len(intervalos_deliveries_agrupados[minuto])
+    for minuto in minutos
+]
+
+promedio_pickups_por_minuto = [
+    sum(intervalos_pickups_agrupados[minuto]) / len(intervalos_pickups_agrupados[minuto])
+    for minuto in minutos
+]
+
+# Paso 3: Graficar los promedios
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+plt.plot(minutos, promedio_deliveries_por_minuto, label='Promedio Deliveries', marker='o')
+plt.plot(minutos, promedio_pickups_por_minuto, label='Promedio Pickups', marker='x')
+
+plt.xlabel('Minuto')
+plt.ylabel('Porcentaje')
+plt.title('Promedio de Porcentajes de Deliveries y Pickups por Intervalos')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
