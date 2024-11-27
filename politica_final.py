@@ -64,7 +64,7 @@ def flujo_ruteo(camion, simulacion, parametros):
 
     depot = [10000, 10000]
     # 4. Generar la ruta según los pedidos en el área con más pedidos
-    ruta = generar_ruta(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, tiempo_limite=180)
+    ruta = generar_ruta(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, tiempo_limite=160)
 
     # Si no hay puntos en la ruta, no hacer nada
     if len(ruta) <= 2:
@@ -350,7 +350,7 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
         todos_los_pedidos = simulacion.pedidos_disponibles + simulacion.pedidos_entregados
         nueva_ruta = cheapest_insertion_adaptacion(
             simulacion.minuto_actual, parametros, camion, current_index,
-            nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=180
+            nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=160
         )
 
         # Comparar la nueva ruta con la actual
@@ -468,7 +468,7 @@ def registrar_tiempos_delivery(simulacion, camiones):
 
 
 def cheapest_insertion_adaptacion(
-    minuto_actual, parametros, camion, current_index, pedidos_validos, ruta_actual, todos_los_pedidos, tiempo_limite=180
+    minuto_actual, parametros, camion, current_index, pedidos_validos, ruta_actual, todos_los_pedidos, tiempo_limite=160
 ):
     # Obtener la ubicación y el tiempo actual del camión
     current_location = ruta_actual[current_index]

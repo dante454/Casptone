@@ -42,7 +42,7 @@ def calculate_arrival_times(ruta_indices, pedidos_validos, depot, camion_velocid
 
 
 # Algoritmo de Cheapest Insertion corregido
-def cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=180):
+def cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=160):
     # Proceso de inserción con prioridades y rechazo inteligente
     while unvisited:
         min_increase = float('inf')
@@ -137,19 +137,19 @@ def total_distance(route):
 
 def calcular_prioridad(pedido, minuto_actual):
         if pedido.indicador == 0:  # Delivery
-            tiempo_restante = 180 - (minuto_actual - pedido.minuto_llegada)
+            tiempo_restante = 160 - (minuto_actual - pedido.minuto_llegada)
             return tiempo_restante
         else:  # Pick-up
-            return(180)
+            return(160)
 
-def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=180):
+def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=160):
     # Calcular prioridades de los pedidos
     def calcular_prioridad(pedido):
         if pedido.indicador == 0:  # Delivery
-            tiempo_restante = 180 - (minuto_actual - pedido.minuto_llegada)
+            tiempo_restante = 160 - (minuto_actual - pedido.minuto_llegada)
             return tiempo_restante
         else:  # Pick-up
-            return(180)
+            return(160)
 
     # Ordenar pedidos por prioridad
     pedidos_disponibles = sorted(pedidos_disponibles, key=calcular_prioridad, reverse=False)
@@ -190,7 +190,7 @@ def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, para
         print("La ruta inicial excede el horizonte de tiempo")
         return [depot, depot]  # No se puede realizar ninguna ruta
 
-    ruta = cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=180)  # Pasa la ubicación del depot
+    ruta = cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=160)  # Pasa la ubicación del depot
 
     return ruta
 
