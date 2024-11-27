@@ -367,7 +367,8 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
                 punto for punto in nueva_ruta if not any(np.array_equal(punto, p_antiguo) for p_antiguo in camion.rutas[-1])
             ]
             camion.rutas[-1] = nueva_ruta
-            actualizar_estado_simulacion(simulacion, puntos_nuevos)
+            ruta_restante = nueva_ruta[current_index:]
+            actualizar_estado_simulacion(simulacion, ruta_restante)
 
             # Incrementar el conteo de pickups actuales del camión
             camion.pickups_actuales += len(nuevos_pickups)
@@ -695,7 +696,7 @@ camiones = [
 
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
-#registrar_tiempos_delivery(simulacion, camiones)
+registrar_tiempos_delivery(simulacion, camiones)
 
 
 # Llamar a la función para crear el GIF
