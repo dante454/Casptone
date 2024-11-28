@@ -2,11 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from funciones_caso_base import *
 
-# Función para calcular la distancia euclidiana entre dos puntos
-
-def manhattan_distance(p1, p2):
-    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
-
+#Calcula en el minuto que se llega a cada punto de la ruta para luego ver si es factible agregar ese punto, se usa para rutear e incorporar pickup
 def calculate_arrival_times(ruta_indices, pedidos_validos, depot, camion_velocidad, minuto_actual, service_time=3):
         arrival_times = []
         current_time = minuto_actual
@@ -40,9 +36,8 @@ def calculate_arrival_times(ruta_indices, pedidos_validos, depot, camion_velocid
 
         return arrival_times, current_time  # Retorna los tiempos de llegada y el tiempo total
 
-
-# Algoritmo de Cheapest Insertion corregido
-def cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=160):
+# Algoritmo de Cheapest Insertion corregido con la heuristica de ruteo (Descarta el pedido si no es urgente y empeora mucho la ruta)
+def cheapest_insertion(tiempo_total, unvisited, route, pedidos_validos, depot, camion, minuto_actual, parametros, tiempo_limite=195):
     # Proceso de inserción con prioridades y rechazo inteligente
     while unvisited:
         min_increase = float('inf')
@@ -128,28 +123,23 @@ def verificar_llegada_a_tiempo(camion, ruta, minuto_actual):
         return False
     return True
 
-# Función para calcular la distancia total de una ruta
-def total_distance(route):
-    dist = 0
-    for i in range(len(route) - 1):
-        dist += manhattan_distance(route[i], route[i + 1])
-    return dist
-
+#Calcular prioridad para poder ver que pedidos priorizar de los deliveries
 def calcular_prioridad(pedido, minuto_actual):
         if pedido.indicador == 0:  # Delivery
-            tiempo_restante = 160 - (minuto_actual - pedido.minuto_llegada)
+            tiempo_restante = 195 - (minuto_actual - pedido.minuto_llegada)
             return tiempo_restante
         else:  # Pick-up
-            return(160)
+            return(195)
 
-def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=160):
+#Funcion que hace el primer llamado a cheapest insertion y hace la entrega de un punto valido para luego crear la ruta
+def generar_ruta(depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=195):
     # Calcular prioridades de los pedidos
     def calcular_prioridad(pedido):
         if pedido.indicador == 0:  # Delivery
-            tiempo_restante = 160 - (minuto_actual - pedido.minuto_llegada)
+            tiempo_restante = 195 - (minuto_actual - pedido.minuto_llegada)
             return tiempo_restante
         else:  # Pick-up
-            return(160)
+            return(195)
 
     # Ordenar pedidos por prioridad
     pedidos_disponibles = sorted(pedidos_disponibles, key=calcular_prioridad, reverse=False)
@@ -190,22 +180,11 @@ def generar_ruta(points, depot, camion, minuto_actual, pedidos_disponibles, para
         print("La ruta inicial excede el horizonte de tiempo")
         return [depot, depot]  # No se puede realizar ninguna ruta
 
-    ruta = cheapest_insertion(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, tiempo_limite=160)  # Pasa la ubicación del depot
+    ruta = cheapest_insertion(tiempo_total, unvisited, route, pedidos_validos, depot, camion, minuto_actual, parametros, tiempo_limite=195)  # Pasa la ubicación del depot
 
     return ruta
 
-def calcular_tiempo_regreso(velocidad, distancia):
-    tiempo = distancia / velocidad
-    return tiempo
-
-
-def vence_el_pedido(pedido, tiempo_llegada_punto, tiempo_limite):
-    if pedido.indicador == 0:
-        if (tiempo_llegada_punto <= pedido.minuto_llegada + tiempo_limite):
-            return False
-    return True
-
-
+#Cheapest insertion que se usa para el caso base
 def cheapest_insertion_caso_base(points, depot, camion, minuto_actual, pedidos_disponibles, tiempo_limite=180):
     """
     Algoritmo de Cheapest Insertion para el caso base, sin ordenamiento de prioridad

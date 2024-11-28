@@ -1,43 +1,10 @@
-# Parametros calibrados:
-# * Instancia 1:
-#     * {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 31, 'max_puntos_eliminados': 14, 'x_minutos': 20, 'limite_area1': 128, 'limite_area2': 210, 'peso_min_pedidos': 1.4258208140237363, 'peso_ventana_tiempo': 1.7845358791509105, 'umbral_salida': 1.9097996396208297, 'tiempo_minimo_pickup': 39, 'max_aumento_distancia': 11, 'tiempo_necesario_pick_up': 1378, 'tiempo_restante_max': 111, 'max_aumento_distancia_delivery': 844}
-#     * 
-#     * {'min_pedidos_salida': 13, 'porcentaje_reduccion_distancia': 37, 'max_puntos_eliminados': 8, 'x_minutos': 59, 'limite_area1': 134, 'limite_area2': 186, 'peso_min_pedidos': 1.4345567915049973, 'peso_ventana_tiempo': 1.3588844137499472, 'umbral_salida': 1.3851690157693943, 'tiempo_minimo_pickup': 38, 'max_aumento_distancia': 20, 'tiempo_necesario_pick_up': 968, 'tiempo_restante_max': 9, 'max_aumento_distancia_delivery': 29}
-#     * 
-#     * {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 62, 'max_puntos_eliminados': 17, 'x_minutos': 56, 'limite_area1': 93, 'limite_area2': 270, 'peso_min_pedidos': 1.3683745561452805, 'peso_ventana_tiempo': 1.5087497070531928, 'umbral_salida': 1.609613386809045, 'tiempo_minimo_pickup': 26, 'max_aumento_distancia': 9, 'tiempo_necesario_pick_up': 1054, 'tiempo_restante_max': 137, 'max_aumento_distancia_delivery': 11}
-# * Instancia 2:
-#     * {'min_pedidos_salida': 14, 'porcentaje_reduccion_distancia': 36, 'max_puntos_eliminados': 7, 'x_minutos': 3, 'limite_area1': 134, 'limite_area2': 210, 'peso_min_pedidos': 1.9687142346197708, 'peso_ventana_tiempo': 1.1025506899704678, 'umbral_salida': 1.7115549689422893, 'tiempo_minimo_pickup': 18, 'max_aumento_distancia': 7, 'tiempo_necesario_pick_up': 1413, 'tiempo_restante_max': 130, 'max_aumento_distancia_delivery': 280}
-#     * 
-#     * {'min_pedidos_salida': 18, 'porcentaje_reduccion_distancia': 30, 'max_puntos_eliminados': 16, 'x_minutos': 2, 'limite_area1': 92, 'limite_area2': 213, 'peso_min_pedidos': 1.389935989337192, 'peso_ventana_tiempo': 0.8677152709217305, 'umbral_salida': 1.392232984569243, 'tiempo_minimo_pickup': 28, 'max_aumento_distancia': 9, 'tiempo_necesario_pick_up': 886, 'tiempo_restante_max': 101, 'max_aumento_distancia_delivery': 29}
-#     * 
-#     * {'min_pedidos_salida': 17, 'porcentaje_reduccion_distancia': 63, 'max_puntos_eliminados': 14, 'x_minutos': 27, 'limite_area1': 109, 'limite_area2': 199, 'peso_min_pedidos': 1.129656004873347, 'peso_ventana_tiempo': 0.6032264027418948, 'umbral_salida': 1.1825581718546028, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 5, 'tiempo_necesario_pick_up': 1143, 'tiempo_restante_max': 100, 'max_aumento_distancia_delivery': 41}
-# * Instancia 3:
-#     * {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 6, 'x_minutos': 50, 'limite_area1': 119, 'limite_area2': 267, 'peso_min_pedidos': 0.5971182427582737, 'peso_ventana_tiempo': 0.713478246757084, 'umbral_salida': 1.011875143339422, 'tiempo_minimo_pickup': 31, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 824, 'tiempo_restante_max': 118, 'max_aumento_distancia_delivery': 491}
-#     * 
-#     * {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 63, 'max_puntos_eliminados': 9, 'x_minutos': 40, 'limite_area1': 144, 'limite_area2': 239, 'peso_min_pedidos': 1.2709372730059911, 'peso_ventana_tiempo': 1.5742119038813274, 'umbral_salida': 1.587618895342463, 'tiempo_minimo_pickup': 44, 'max_aumento_distancia': 14, 'tiempo_necesario_pick_up': 1272, 'tiempo_restante_max': 122, 'max_aumento_distancia_delivery': 19}
-#     * 
-#     * {'min_pedidos_salida': 19, 'porcentaje_reduccion_distancia': 67, 'max_puntos_eliminados': 13, 'x_minutos': 1, 'limite_area1': 140, 'limite_area2': 180, 'peso_min_pedidos': 0.7993143719423276, 'peso_ventana_tiempo': 0.8241533963555013, 'umbral_salida': 1.231678361485861, 'tiempo_minimo_pickup': 27, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 1405, 'tiempo_restante_max': 174, 'max_aumento_distancia_delivery': 82}
-# * Instancia 4:
-#     * {'min_pedidos_salida': 2, 'porcentaje_reduccion_distancia': 46, 'max_puntos_eliminados': 13, 'x_minutos': 8, 'limite_area1': 143, 'limite_area2': 232, 'peso_min_pedidos': 1.3650083117702956, 'peso_ventana_tiempo': 1.8548290102815066, 'umbral_salida': 1.5601612050582978, 'tiempo_minimo_pickup': 17, 'max_aumento_distancia': 12, 'tiempo_necesario_pick_up': 1294, 'tiempo_restante_max': 195, 'max_aumento_distancia_delivery': 1227}
-#     * 
-#     * {'min_pedidos_salida': 2, 'porcentaje_reduccion_distancia': 49, 'max_puntos_eliminados': 12, 'x_minutos': 37, 'limite_area1': 109, 'limite_area2': 235, 'peso_min_pedidos': 1.3462605634101168, 'peso_ventana_tiempo': 1.523125976294386, 'umbral_salida': 1.4604432560468708, 'tiempo_minimo_pickup': 37, 'max_aumento_distancia': 11, 'tiempo_necesario_pick_up': 1445, 'tiempo_restante_max': 54, 'max_aumento_distancia_delivery': 1436}
-#     * 
-#     * {'min_pedidos_salida': 15, 'porcentaje_reduccion_distancia': 68, 'max_puntos_eliminados': 11, 'x_minutos': 58, 'limite_area1': 141, 'limite_area2': 239, 'peso_min_pedidos': 1.9138181730131887, 'peso_ventana_tiempo': 1.8613353548514777, 'umbral_salida': 1.3676121600899114, 'tiempo_minimo_pickup': 33, 'max_aumento_distancia': 9, 'tiempo_necesario_pick_up': 1442, 'tiempo_restante_max': 166, 'max_aumento_distancia_delivery': 916}
-
-
-
 import numpy as np
 from ruteo import *
 import pickle
 import matplotlib.pyplot as plt
 from funciones_caso_base import *
 
-
-#Pasos a implementar forma inteligente y con un parametro modificable de priorizar los deliveries con los pick ups
-#Forma inteligente de incertar un pick up a una ruta en movimiento
-#Forma de descartar los pedidos de una ruta en caso de mejora
-#Mejorar la iniciacion de la funcion para que esta se puedan modificar de forma intelegente los parametros
-
+#Separa los pedidos en la areas asignadas por los parametros
 def separar_y_seleccionar_area(pedidos_disponibles):
     # Separar los pedidos según su área
     pedidos_area1 = [pedido for pedido in pedidos_disponibles if pedido.area == 1]
@@ -54,7 +21,7 @@ def separar_y_seleccionar_area(pedidos_disponibles):
     else:
         return pedidos_area3
 
-
+#Maneja el flujo de desiciones desde que se toma la decision de salir a repartir
 def flujo_ruteo(camion, simulacion, parametros):
     # 1. Obtener los pedidos disponibles
     pedidos_disponibles = simulacion.pedidos_disponibles
@@ -64,7 +31,7 @@ def flujo_ruteo(camion, simulacion, parametros):
 
     depot = [10000, 10000]
     # 4. Generar la ruta según los pedidos en el área con más pedidos
-    ruta = generar_ruta(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, tiempo_limite=160)
+    ruta = generar_ruta(depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, tiempo_limite=195)
 
     # Si no hay puntos en la ruta, no hacer nada
     if len(ruta) <= 2:
@@ -83,33 +50,10 @@ def flujo_ruteo(camion, simulacion, parametros):
     # 9. Devolver la ruta y el tiempo de la ruta
     return ruta, tiempo_ruta
 
-
-
-def asignar_area(punto, parametros):
-    x, y = punto
-    cx, cy = 10000, 10000  # Centro del mapa
-    vector = np.array([x - cx, y - cy])
-    angle = np.degrees(np.arctan2(vector[1], vector[0]))
-
-    if angle < 0:
-        angle += 360
-
-    # Usar los dos parámetros de ángulo para definir los límites de las tres áreas
-    limite_area1 = parametros["limite_area1"]
-    limite_area2 = parametros["limite_area2"]
-
-    if 0 <= angle < limite_area1:
-        return 1  # Área 1
-    elif limite_area1 <= angle < limite_area2:
-        return 2  # Área 2
-    else:
-        return 3  # Área 3
-
 # Función para actualizar el estado de la simulación, marcando los puntos de la ruta como visitados
 def actualizar_estado_simulacion(simulacion, ruta):
     # Lista para almacenar los pedidos que se entregarán
     pedidos_a_entregar = []
-    
     
     # Para cada punto en la ruta, buscar el pedido correspondiente en pedidos disponibles
     for punto in ruta:
@@ -135,6 +79,7 @@ def actualizar_estado_simulacion(simulacion, ruta):
     # Remover los pedidos entregados de la lista de pedidos disponibles
     simulacion.pedidos_disponibles = [pedido for pedido in simulacion.pedidos_disponibles if pedido not in pedidos_a_entregar]
 
+#Simula minuto a minuto todo lo que va pasando dinamicamente
 def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3):
     
     for minuto in range(520, 1020 + 1):
@@ -149,6 +94,8 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
             parametros = parametros_ventana_3
         # Actualizar los pedidos disponibles minuto a minuto
         simulacion.revisar_pedidos_disponibles()
+        velocidad_camion = ((25 * 1000) / 60)
+        simulacion.tercerizar_pedido([10000,10000],velocidad_camion)
 
 
         # Actualizar tiempos de los camiones
@@ -191,89 +138,32 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
 
 
         # Avanza el minuto en la simulación
-        simulacion.avanzar_minuto()
+        simulacion.avanzar_minuto(parametros)
         simulacion.registrar_estado(camiones)
     
     print(len(simulacion.pedidos_entregados))
     print("Simulación finalizada.")
-    
 
-    for camion in camiones:
-        tiempo_en_ruta = 0
+# Función que evalúa los criterios de salida de los camiones
+def evaluar_salida(camion, simulacion, parametros):
+    if camion.tiempo_restante > 0:
+        evaluar_incorporacion_pickup(camion, parametros, simulacion)
+        return False
 
-        for ruta in camion.rutas:
-            tiempo_en_ruta += calcular_tiempo_ruta(ruta, camion.velocidad)
+    if len(simulacion.pedidos_disponibles) == 0:
+        return False
 
-        print(f"Camión {camion.id}:")
-        print(f"Veces que realizó rutas: {len(camion.rutas)}")
-        print(f"Tiempo total manejado: {tiempo_en_ruta / 60:.2f} horas")
+    # Calcula el valor ponderado de los criterios
+    valor_ponderado = (
+        parametros["peso_min_pedidos"] * (len(simulacion.pedidos_disponibles) / max(1, parametros["min_pedidos_salida"])) +
+        parametros["peso_ventana_tiempo"] * (simulacion.minuto_actual % parametros["x_minutos"] == 0)
+    )
 
-    beneficio_total = calcular_beneficio(simulacion)
-    distancia_total = calcular_distancia_total(camiones)
-
-    print(f"Beneficio total: {beneficio_total}")
-    print(f"Distancia total recorrida: {distancia_total} M")
-
-    tiempos_respuesta = [pedido.tiempo_entrega for pedido in simulacion.pedidos_entregados if pedido.tiempo_entrega is not None]
-    tiempo_respuesta_promedio = sum(tiempos_respuesta) / len(tiempos_respuesta)
-    print(f"Tiempo de respuesta promedio: {tiempo_respuesta_promedio:.2f} minutos")
+    # Verifica si el valor ponderado supera el umbral
+    return valor_ponderado >= parametros["umbral_salida"]
 
 
-    # Contar la cantidad de pick-ups y deliveries realizados
-    cantidad_pickups = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 1)
-    cantidad_deliveries = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 0)
-
-    # Imprimir el conteo de pick-ups y deliveries
-    print(f"Cantidad de pick-ups realizados: {cantidad_pickups}")
-    print(f"Cantidad de deliveries realizados: {cantidad_deliveries}")
-
-    print()
-
-# Al final de la simulación
-    
-    
-    #graficar_rutas_y_puntos(camiones, simulacion)
-    #graficar_beneficio(simulacion)
-
-def verificar_pedidos_repetidos(pedidos_entregados):
-    print(len(pedidos_entregados))
-
-    pedidos_vistos = set()
-    pedidos_repetidos = []
-    pic = 0
-    deli = 0
-
-    for pedido in pedidos_entregados:
-        if pedido.indicador == 0:
-            deli +=1
-        elif pedido.indicador == 1:
-            pic +=1
-        # Convertir las coordenadas del pedido en una tupla para que sean hashables
-        coordenadas = tuple(pedido.coordenadas)
-        if coordenadas in pedidos_vistos:
-            pedidos_repetidos.append(pedido)
-        else:
-            pedidos_vistos.add(coordenadas)
-    print(pic)
-    print(deli)
-    return pedidos_repetidos
-
-
-def graficar_beneficio(simulacion):
-    intervalos = [x[0] for x in simulacion.beneficio_por_intervalo]
-    porcentajes = [x[1] for x in simulacion.beneficio_por_intervalo]
-
-    if not porcentajes:
-        print("No hay datos para graficar.")
-        return
-
-    plt.figure(figsize=(10, 5))
-    plt.bar(intervalos, porcentajes, width=25, align='center')
-    plt.xlabel('Minuto')
-    plt.ylabel('Porcentaje de Beneficio Captado')
-    plt.title('Porcentaje de Beneficio Captado cada 30 Minutos')
-    plt.show()
-
+#Aqui se encuentran todas las funciones relacionadas a la incorporacion del pick up
 def evaluar_incorporacion_pickup(camion, parametros, simulacion):
     # Límite de pickups dinámicos permitidos por ruta
     max_pickups_dinamicos = 5
@@ -315,9 +205,6 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
         # Si por alguna razón el índice está fuera de rango, no hacemos nada
         return
 
-
-
-
 def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
     # Límite de pickups dinámicos permitidos por ruta
     max_pickups_dinamicos = 5
@@ -350,7 +237,7 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
         todos_los_pedidos = simulacion.pedidos_disponibles + simulacion.pedidos_entregados
         nueva_ruta = cheapest_insertion_adaptacion(
             simulacion.minuto_actual, parametros, camion, current_index,
-            nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=160
+            nuevos_pickups, camion.rutas[-1], todos_los_pedidos, tiempo_limite=195
         )
 
         # Comparar la nueva ruta con la actual
@@ -386,90 +273,8 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
         print(f"No hay nuevas solicitudes de pick-up disponibles en el minuto {simulacion.minuto_actual}.")
         return camion.rutas[-1]  # Devolver la ruta actual sin cambios
 
-
-
-
-
-
-def hora_entrega_pedidos(ruta, depot, camion_velocidad, minuto_actual, service_time=3):
-    arrival_times = []
-    current_time = minuto_actual
-    current_location = depot
-
-    # Para cada punto en la ruta
-    for punto in ruta:
-        next_location = punto
-
-        # Calcular el tiempo de viaje al siguiente punto
-        distance = manhattan_distance(current_location, next_location)
-        travel_time = distance / camion_velocidad
-
-        # Tiempo de llegada al siguiente punto
-        arrival_time = current_time + travel_time
-
-        # Actualizar el tiempo actual sumando el tiempo de viaje y el tiempo de atención
-        current_time = arrival_time + service_time
-
-        # Almacenar el tiempo de llegada (antes del servicio)
-        arrival_times.append(arrival_time)
-
-        # Actualizar la ubicación actual
-        current_location = next_location
-
-    # Finalmente, regresar al depósito
-    distance = manhattan_distance(current_location, depot)
-    travel_time = distance / camion_velocidad
-    current_time += travel_time  # Sumar tiempo para regresar al depósito
-
-    return arrival_times, current_time  # Retorna los tiempos de llegada y el tiempo total
-
-# Función que evalúa los criterios de salida de los camiones
-def evaluar_salida(camion, simulacion, parametros):
-    if camion.tiempo_restante > 0:
-        evaluar_incorporacion_pickup(camion, parametros, simulacion)
-        return False
-
-    if len(simulacion.pedidos_disponibles) == 0:
-        return False
-
-    # Calcula el valor ponderado de los criterios
-    valor_ponderado = (
-        parametros["peso_min_pedidos"] * (len(simulacion.pedidos_disponibles) / max(1, parametros["min_pedidos_salida"])) +
-        parametros["peso_ventana_tiempo"] * (simulacion.minuto_actual % parametros["x_minutos"] == 0)
-    )
-
-    # Verifica si el valor ponderado supera el umbral
-    return valor_ponderado >= parametros["umbral_salida"]
-
-
-def registrar_tiempos_delivery(simulacion, camiones):
-    # Lista para almacenar los datos de cada delivery (momento de aparición y recogida)
-    registros_delivery = []
-
-    # Iterar sobre todos los camiones y sus rutas
-
-    for pedido in simulacion.pedidos_entregados:
-        if pedido.indicador == 0:  # Identificar los pedidos de delivery
-                registro = {
-                    "momento_aparicion": pedido.minuto_llegada,
-                    "momento_recogida": pedido.tiempo_entrega
-                }
-                registros_delivery.append(registro)
-
-    # Convertir a DataFrame
-    df_registros = pd.DataFrame(registros_delivery)
-
-    # Guardar en un archivo CSV
-    output_path = "registros_delivery.csv"
-    df_registros.to_csv(output_path, index=False)
-    print(f"Archivo guardado en {output_path}")
-
-
-
-
 def cheapest_insertion_adaptacion(
-    minuto_actual, parametros, camion, current_index, pedidos_validos, ruta_actual, todos_los_pedidos, tiempo_limite=160
-):
+    minuto_actual, parametros, camion, current_index, pedidos_validos, ruta_actual, todos_los_pedidos, tiempo_limite=195):
     # Obtener la ubicación y el tiempo actual del camión
     current_location = ruta_actual[current_index]
     
@@ -633,37 +438,63 @@ def calculate_arrival_times_adapted(ruta_coords, camion_velocidad, current_time,
 
     return arrival_times, current_time # Retorna los tiempos de llegada y el tiempo total
 
+def hora_entrega_pedidos(ruta, depot, camion_velocidad, minuto_actual, service_time=3):
+    arrival_times = []
+    current_time = minuto_actual
+    current_location = depot
 
-#parametros con 1000 it optuna.
-#instancia 1
+    # Para cada punto en la ruta
+    for punto in ruta:
+        next_location = punto
 
-# {'min_pedidos_salida': 12, 'porcentaje_reduccion_distancia': 61, 'max_puntos_eliminados': 10, 'x_minutos': 42, 'limite_area1': 109, 'limite_area2': 254, 'peso_min_pedidos': 1.744717231972422, 'peso_ventana_tiempo': 1.1783687671367267, 'umbral_salida': 1.1204819899567817, 'tiempo_minimo_pickup': 25, 'max_aumento_distancia': 7, 'tiempo_necesario_pick_up': 65, 'tiempo_restante_max': 60, 'max_aumento_distancia_delivery': 1197}
+        # Calcular el tiempo de viaje al siguiente punto
+        distance = manhattan_distance(current_location, next_location)
+        travel_time = distance / camion_velocidad
 
-# {'min_pedidos_salida': 20, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 9, 'x_minutos': 18, 'limite_area1': 111, 'limite_area2': 188, 'peso_min_pedidos': 1.1848891982324603, 'peso_ventana_tiempo': 1.5624060231825407, 'umbral_salida': 1.6175862128535314, 'tiempo_minimo_pickup': 20, 'max_aumento_distancia': 16, 'tiempo_necesario_pick_up': 1496, 'tiempo_restante_max': 17, 'max_aumento_distancia_delivery': 595}
+        # Tiempo de llegada al siguiente punto
+        arrival_time = current_time + travel_time
 
-# {'min_pedidos_salida': 15, 'porcentaje_reduccion_distancia': 45, 'max_puntos_eliminados': 13, 'x_minutos': 9, 'limite_area1': 132, 'limite_area2': 190, 'peso_min_pedidos': 1.5774308454975026, 'peso_ventana_tiempo': 1.1731581230854333, 'umbral_salida': 1.3076635672736978, 'tiempo_minimo_pickup': 18, 'max_aumento_distancia': 11, 'tiempo_necesario_pick_up': 1371, 'tiempo_restante_max': 103, 'max_aumento_distancia_delivery': 893}
+        # Actualizar el tiempo actual sumando el tiempo de viaje y el tiempo de atención
+        current_time = arrival_time + service_time
 
-#I2
+        # Almacenar el tiempo de llegada (antes del servicio)
+        arrival_times.append(arrival_time)
 
-# {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 55, 'max_puntos_eliminados': 19, 'x_minutos': 60, 'limite_area1': 139, 'limite_area2': 270, 'peso_min_pedidos': 1.270769165494037, 'peso_ventana_tiempo': 0.5334298758833237, 'umbral_salida': 1.142787259922978, 'tiempo_minimo_pickup': 33, 'max_aumento_distancia': 20, 'tiempo_necesario_pick_up': 647, 'tiempo_restante_max': 97, 'max_aumento_distancia_delivery': 232}
+        # Actualizar la ubicación actual
+        current_location = next_location
 
-# {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 43, 'max_puntos_eliminados': 11, 'x_minutos': 3, 'limite_area1': 126, 'limite_area2': 200, 'peso_min_pedidos': 1.9875097075448465, 'peso_ventana_tiempo': 1.9411077324851984, 'umbral_salida': 1.2940403662686877, 'tiempo_minimo_pickup': 36, 'max_aumento_distancia': 7, 'tiempo_necesario_pick_up': 1104, 'tiempo_restante_max': 132, 'max_aumento_distancia_delivery': 38}
+    # Finalmente, regresar al depósito
+    distance = manhattan_distance(current_location, depot)
+    travel_time = distance / camion_velocidad
+    current_time += travel_time  # Sumar tiempo para regresar al depósito
 
-# {'min_pedidos_salida': 20, 'porcentaje_reduccion_distancia': 68, 'max_puntos_eliminados': 18, 'x_minutos': 14, 'limite_area1': 91, 'limite_area2': 265, 'peso_min_pedidos': 1.1700431872055927, 'peso_ventana_tiempo': 1.9398927740769498, 'umbral_salida': 1.0454057612407521, 'tiempo_minimo_pickup': 23, 'max_aumento_distancia': 10, 'tiempo_necesario_pick_up': 814, 'tiempo_restante_max': 111, 'max_aumento_distancia_delivery': 1224}
+    return arrival_times, current_time  # Retorna los tiempos de llegada y el tiempo total
 
-#instancia 3
-# {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 47, 'max_puntos_eliminados': 16, 'x_minutos': 18, 'limite_area1': 147, 'limite_area2': 215, 'peso_min_pedidos': 1.6525938339343251, 'peso_ventana_tiempo': 1.8947957184968578, 'umbral_salida': 1.126101447963525, 'tiempo_minimo_pickup': 31, 'max_aumento_distancia': 16, 'tiempo_necesario_pick_up': 661, 'tiempo_restante_max': 106, 'max_aumento_distancia_delivery': 1048}
+def verificar_pedidos_repetidos(pedidos_entregados):
+    print(len(pedidos_entregados))
 
-# {'min_pedidos_salida': 3, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 15, 'x_minutos': 9, 'limite_area1': 140, 'limite_area2': 243, 'peso_min_pedidos': 1.8017927848294588, 'peso_ventana_tiempo': 1.325020645146538, 'umbral_salida': 1.488642659103274, 'tiempo_minimo_pickup': 37, 'max_aumento_distancia': 14, 'tiempo_necesario_pick_up': 975, 'tiempo_restante_max': 181, 'max_aumento_distancia_delivery': 1351}
+    pedidos_vistos = set()
+    pedidos_repetidos = []
+    pic = 0
+    deli = 0
 
-# {'min_pedidos_salida': 12, 'porcentaje_reduccion_distancia': 42, 'max_puntos_eliminados': 17, 'x_minutos': 25, 'limite_area1': 110, 'limite_area2': 231, 'peso_min_pedidos': 1.0883231580184491, 'peso_ventana_tiempo': 1.0133168647668476, 'umbral_salida': 1.9840669226875491, 'tiempo_minimo_pickup': 34, 'max_aumento_distancia': 12, 'tiempo_necesario_pick_up': 1438, 'tiempo_restante_max': 68, 'max_aumento_distancia_delivery': 1355}
+    for pedido in pedidos_entregados:
+        if pedido.indicador == 0:
+            deli +=1
+        elif pedido.indicador == 1:
+            pic +=1
+        # Convertir las coordenadas del pedido en una tupla para que sean hashables
+        coordenadas = tuple(pedido.coordenadas)
+        if coordenadas in pedidos_vistos:
+            pedidos_repetidos.append(pedido)
+        else:
+            pedidos_vistos.add(coordenadas)
+    print(pic)
+    print(deli)
+    return pedidos_repetidos
 
-#I4
-# {'min_pedidos_salida': 16, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 14, 'x_minutos': 47, 'limite_area1': 92, 'limite_area2': 259, 'peso_min_pedidos': 0.5013335069404848, 'peso_ventana_tiempo': 1.9178586787518015, 'umbral_salida': 1.848042237458438, 'tiempo_minimo_pickup': 34, 'max_aumento_distancia': 14, 'tiempo_necesario_pick_up': 1433, 'tiempo_restante_max': 8, 'max_aumento_distancia_delivery': 1223}
 
-# {'min_pedidos_salida': 18, 'porcentaje_reduccion_distancia': 43, 'max_puntos_eliminados': 16, 'x_minutos': 3, 'limite_area1': 123, 'limite_area2': 202, 'peso_min_pedidos': 1.1209231634506647, 'peso_ventana_tiempo': 1.6934702849358318, 'umbral_salida': 1.7599227622579043, 'tiempo_minimo_pickup': 31, 'max_aumento_distancia': 20, 'tiempo_necesario_pick_up': 1326, 'tiempo_restante_max': 116, 'max_aumento_distancia_delivery': 443}
 
-# {'min_pedidos_salida': 16, 'porcentaje_reduccion_distancia': 63, 'max_puntos_eliminados': 10, 'x_minutos': 7, 'limite_area1': 118, 'limite_area2': 183, 'peso_min_pedidos': 1.468924730202163, 'peso_ventana_tiempo': 1.8249477249553931, 'umbral_salida': 1.5368405114652302, 'tiempo_minimo_pickup': 16, 'max_aumento_distancia': 14, 'tiempo_necesario_pick_up': 1046, 'tiempo_restante_max': 35, 'max_aumento_distancia_delivery': 543}
 
 
 
@@ -696,7 +527,7 @@ camiones = [
 
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
-registrar_tiempos_delivery(simulacion, camiones)
+registrar_tiempos_delivery(simulacion)
 
 
 # Llamar a la función para crear el GIF

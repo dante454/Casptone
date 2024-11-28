@@ -5,12 +5,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+#Clase que registra toda la simulacion y las cosas que rigen sobre ella
 class EstadoSimulacion:
     def __init__(self, minuto_inicial, puntos, indicadores, arribos_por_minuto):
         self.minuto_actual = minuto_inicial
         self.pedidos_no_disponibles = []
         self.pedidos_disponibles = []
         self.pedidos_entregados = []
+        self.pedidos_tercerizados = []
         self.puntos = puntos
         self.indicadores = indicadores
         self.arribos_por_minuto = arribos_por_minuto
@@ -21,7 +23,7 @@ class EstadoSimulacion:
         self.deliveries_intervalos = []
 
 
-    def avanzar_minuto(self):
+    def avanzar_minuto(self, parametros):
         self.minuto_actual += 1
         self.revisar_pedidos_disponibles()
 
@@ -30,7 +32,7 @@ class EstadoSimulacion:
             cantidad_pedidos = self.arribos_por_minuto[self.minuto_actual]
             for _ in range(cantidad_pedidos):
                 # Crear pedidos a partir de los puntos e indicadores
-                nuevo_pedido = Pedido(self.puntos[self.punto_index], self.indicadores[self.punto_index], self.minuto_actual)
+                nuevo_pedido = Pedido(self.puntos[self.punto_index], self.indicadores[self.punto_index], self.minuto_actual, parametros)
                 self.pedidos_no_disponibles.append(nuevo_pedido)
                 self.punto_index += 1  # Avanzar al siguiente punto
 
@@ -88,8 +90,20 @@ class EstadoSimulacion:
         # Agregar el estado actual a la lista de registros
         self.registro_minuto_a_minuto.append(estado)
 
+    def tercerizar_pedido(self, depot, velocidad_camion):
+        for pedido in self.pedidos_disponibles[:]:
+            tiempo_tercerizacion = calcular_tiempo_ruta([depot, pedido.coordenadas], velocidad_camion) + 5
+            tiempo_vida_restante =  195 - (self.minuto_actual - pedido.minuto_llegada) - tiempo_tercerizacion
+            
+            if tiempo_vida_restante <= 0:
+                self.pedidos_disponibles.remove(pedido)
+                self.pedidos_tercerizados.append(pedido)
+
+
+
+#Clase que modela los pedidos y toda la informacion que contienen
 class Pedido:
-    def __init__(self, coordenadas, indicador, minuto_llegada):
+    def __init__(self, coordenadas, indicador, minuto_llegada, parametros):
         self.coordenadas = coordenadas
         self.indicador = indicador  # 0: Delivery, 1: Pick-up
         self.minuto_llegada = minuto_llegada
@@ -97,7 +111,7 @@ class Pedido:
         self.entregado = 0  # 0: No entregado, 1: Entregado
         self.tiempo_entrega = None  # Tiempo de entrega (minuto_llegada - minuto_entrega)
         self.momento_entrega = None
-        self.area = self.determinar_area()  # Atributo que indica el área del pedido
+        self.area = self.determinar_area(parametros)  # Atributo que indica el área del pedido
 
     def hacer_disponible(self, minuto_actual):
         if minuto_actual >= self.minuto_llegada + 15:
@@ -110,9 +124,10 @@ class Pedido:
         self.momento_entrega = minuto_entrega
         self.disponible = 0  # Ya no está disponible porque fue entregado
 
-    def determinar_area(self):
-        return asignar_area(self.coordenadas)
+    def determinar_area(self, parametros):
+        return asignar_area(self.coordenadas, parametros)
 
+#Clase que modela los camiones y toda la informacion que contienen
 class Camion:
     def __init__(self, id, tiempo_inicial):
         self.id = id
@@ -146,11 +161,13 @@ class Camion:
         else:
             self.posicion_actual = None
 
-  
+#Calculo de distacia usando manhatan
 def manhattan_distance(p1, p2):
     return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
   
     # Función para calcular la posición actual del camión
+
+#Funcion que se usa para crear el gif de movimiento y la ruta de los camiones
 def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad_camion):
     tiempo_servicio=3
     tiempos_acumulados = [0]  # Lista para almacenar tiempos acumulados en cada punto
@@ -192,6 +209,7 @@ def calcular_posicion_actual(ruta, tiempo_transcurrido, velocidad_camion):
     # Si no se encontró, devolver la última posición conocida
     return ruta[-1]
 
+#Gif que muestra como aparecen dinamicamente los pedidos y las rutas que se hacen
 def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimiento_camiones.gif"):
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_xlim(0, 20000)
@@ -267,8 +285,7 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
     anim.save(archivo_gif, writer="pillow")
     print(f"GIF creado: {archivo_gif}")
 
-
-
+#Genera un mapa de calor para ver donde estuvieron las rutas mas concurridas
 def generar_mapa_calor_rutas(simulacion, grid_size=100, archivo_png="heatmap_rutas.png"):
     # Dimensiones del mapa
     mapa_dim = 20000
@@ -306,70 +323,7 @@ def generar_mapa_calor_rutas(simulacion, grid_size=100, archivo_png="heatmap_rut
 
     print(f"Mapa de calor guardado en {archivo_png}")
 
-
-
-
-
-
-
-
-
-
-
-
-def graficar_rutas_y_puntos(camiones, simulacion):
-    plt.figure(figsize=(10, 10))
-    
-    # Colores para las rutas de los camiones
-    colores_camiones = ['blue', 'green', 'red']
-    
-    # Variable para controlar si ya se agregó la leyenda de cada camión
-    etiquetas_camion = [False, False, False]
-    
-    # Iterar sobre los camiones y graficar cada ruta
-    for idx, camion in enumerate(camiones):
-        for ruta in camion.rutas:
-            ruta = np.array(ruta)  # Convertir la ruta a un array de numpy
-            if not etiquetas_camion[idx]:  # Solo agregar una vez la etiqueta
-                plt.plot(ruta[:, 0], ruta[:, 1], color=colores_camiones[idx], label=f'Ruta Camión {camion.id}')
-                etiquetas_camion[idx] = True
-            else:
-                plt.plot(ruta[:, 0], ruta[:, 1], color=colores_camiones[idx])
-
-    # Graficar **todos** los puntos de la simulación diferenciados por tipo (pickup o delivery)
-    pickup_legend = False
-    delivery_legend = False
-    
-    for i, punto in enumerate(simulacion.puntos):
-        if simulacion.indicadores[i] == 1:  # Pick-up
-            if not pickup_legend:
-                plt.scatter(punto[0], punto[1], color='orange', marker='o', label='Pick-up')
-                pickup_legend = True
-            else:
-                plt.scatter(punto[0], punto[1], color='orange', marker='o')
-        else:  # Delivery
-            if not delivery_legend:
-                plt.scatter(punto[0], punto[1], color='purple', marker='s', label='Delivery')
-                delivery_legend = True
-            else:
-                plt.scatter(punto[0], punto[1], color='purple', marker='s')
-
-    # Marcar el depósito (asumimos que está en el centro)
-    plt.scatter(10000, 10000, color='black', marker='D', s=100, label='Depósito')
-
-    # Dibujar las líneas divisorias de las áreas con un grosor más grande
-    cx, cy = 10000, 10000
-    plt.plot([cx, cx + 10000 * np.cos(np.radians(0))], [cy, cy + 10000 * np.sin(np.radians(0))], 'k-', linewidth=2.5)  # Línea 0° (ancho de línea 2.5)
-    plt.plot([cx, cx + 10000 * np.cos(np.radians(120))], [cy, cy + 10000 * np.sin(np.radians(120))], 'k-', linewidth=2.5)  # Línea 120° (ancho de línea 2.5)
-    plt.plot([cx, cx + 10000 * np.cos(np.radians(240))], [cy, cy + 10000 * np.sin(np.radians(240))], 'k-', linewidth=2.5)  # Línea 240° (ancho de línea 2.5)
-
-    # Ajustar el gráfico
-    plt.title('Rutas y Puntos de Pick-up/Delivery')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.legend(loc='best')
-    plt.grid(True)
-    plt.show()
+#Se utiliza para ver los tiempos de los registros historicos
 def procesar_tiempos(arrivals, division_minutos):
 
     minutos = [[segundo // division_minutos for segundo in simulacion] for simulacion in arrivals]
@@ -377,14 +331,13 @@ def procesar_tiempos(arrivals, division_minutos):
     arribos_por_minuto = df.apply(lambda x: x.value_counts().sort_index()).fillna(0).astype(int)
     return arribos_por_minuto
 
-
 # Función placeholder para calcular el tiempo de la ruta
 def calcular_tiempo_ruta(ruta, velocidad_camion):
     distancia_total = calcular_distancia_ruta(ruta)
     tiempo_extra = (len(ruta) - 2) * 3 #3 minutos en entregar cada pedido
     return ((distancia_total / velocidad_camion)  + tiempo_extra)# Tiempo en minutos
 
-
+#Calcula la distancia total de una ruta
 def calcular_distancia_ruta(ruta):
     distancia_total = 0
 
@@ -394,6 +347,7 @@ def calcular_distancia_ruta(ruta):
 
     return distancia_total
 
+#Calcula el beneficio totol adquirido por la simulacion
 def calcular_beneficio(simulacion):
     beneficio = 0
     beneficio_maximo = 0
@@ -406,7 +360,7 @@ def calcular_beneficio(simulacion):
             beneficio += 1
 
     # Calcular el beneficio máximo posible
-    for pedido in simulacion.pedidos_disponibles + simulacion.pedidos_entregados:
+    for pedido in simulacion.pedidos_disponibles + simulacion.pedidos_entregados + simulacion.pedidos_tercerizados:
         if pedido.indicador == 0:  # Delivery
             beneficio_maximo += 2
         elif pedido.indicador == 1:  # Pick-up
@@ -418,6 +372,7 @@ def calcular_beneficio(simulacion):
     print(f"Beneficio total: {beneficio}, Beneficio máximo: {beneficio_maximo}, \nPorcentaje recuperado: {porcentaje_recuperado:.2f}%")
     return porcentaje_recuperado
 
+#Calcula la distacia total que recorren los camiones
 def calcular_distancia_total(camiones):
     distancia_total = 0
     for camion in camiones:
@@ -425,58 +380,31 @@ def calcular_distancia_total(camiones):
             distancia_total += calcular_distancia_ruta(ruta)
     return distancia_total
 
-def filtrar_por_radio_buffer(pedidos_disponibles, radio_buffer):
-    # Definir la ubicación del depósito (en el centro del mapa)
-    deposito = np.array([10000, 10000])
-    
-    pedidos_dentro_del_buffer = []
-    
-    for pedido in pedidos_disponibles:
-        # Calcular la distancia Manhattan entre el depósito y el pedido
-        distancia = np.abs(pedido.coordenadas[0] - deposito[0]) + np.abs(pedido.coordenadas[1] - deposito[1])
-        
-        # Si la distancia está dentro del radio del buffer, agregar el pedido a la lista
-        if distancia <= radio_buffer:
-            pedidos_dentro_del_buffer.append(pedido)
-    
-    return pedidos_dentro_del_buffer
+#Registra los tiempo en lo que fueron entregados los deliveries
+def registrar_tiempos_delivery(simulacion):
+    # Lista para almacenar los datos de cada delivery (momento de aparición y recogida)
+    registros_delivery = []
 
+    # Iterar sobre todos los camiones y sus rutas
 
-centros_areas = {
-    1: np.array([7500, 10000]),  # Centro del área 1
-    2: np.array([12500, 7500]),  # Centro del área 2
-    3: np.array([12500, 12500])  # Centro del área 3
-}
+    for pedido in simulacion.pedidos_entregados:
+        if pedido.indicador == 0:  # Identificar los pedidos de delivery
+                registro = {
+                    "momento_aparicion": pedido.minuto_llegada,
+                    "Tiempo_transcurrido": pedido.tiempo_entrega
+                }
+                registros_delivery.append(registro)
 
-# Definir un radio para cada área (puedes ajustar estos valores)
-radios_areas = {
-    1: 10000,  # Radio para el área 1
-    2: 8000,  # Radio para el área 2(abajo iz)
-    3: 70000   # Radio para el área 3
-}
+    # Convertir a DataFrame
+    df_registros = pd.DataFrame(registros_delivery)
 
-# Definir el depósito (ejemplo en el centro del mapa)
-deposito = [10000, 10000]  # Ajusta las coordenadas según tu mapa
+    # Guardar en un archivo CSV
+    output_path = "registros_delivery.csv"
+    df_registros.to_csv(output_path, index=False)
+    print(f"Archivo guardado en {output_path}")
 
-# Definir un radio máximo (e.g., 5000 metros)
-radio_maximo = 5000
-
-def filtrar_por_radio_depot(pedidos_disponibles, deposito, radio_maximo):
-    pedidos_dentro_del_buffer = []
-
-    for pedido in pedidos_disponibles:
-        # Calcular la distancia euclidiana entre el pedido y el depósito
-        distancia = np.sqrt((pedido.coordenadas[0] - deposito[0])**2 + 
-                            (pedido.coordenadas[1] - deposito[1])**2)
-
-        # Si la distancia está dentro del radio máximo, agregar el pedido a la lista
-        if distancia <= radio_maximo:
-            pedidos_dentro_del_buffer.append(pedido)
-
-    return pedidos_dentro_del_buffer
-
-
-def asignar_area(punto):
+#Asigna un area al pedido para separar los pedidos en areas, es una politica, que se rige por parametros
+def asignar_area(punto, parametros):
     x, y = punto
     cx, cy = 10000, 10000  # Centro del mapa
     vector = np.array([x - cx, y - cy])
@@ -485,12 +413,14 @@ def asignar_area(punto):
     if angle < 0:
         angle += 360
 
-    if 0 <= angle < 120:
+    # Usar los dos parámetros de ángulo para definir los límites de las tres áreas
+    limite_area1 = parametros["limite_area1"]
+    limite_area2 = parametros["limite_area2"]
+
+    if 0 <= angle < limite_area1:
         return 1  # Área 1
-    elif 120 <= angle < 240:
+    elif limite_area1 <= angle < limite_area2:
         return 2  # Área 2
     else:
         return 3  # Área 3
-    
-
 
