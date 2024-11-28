@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 import pickle
 import pandas as pd
 
+
+beneficios_incumbentes = []
+
+
 # Define la función objetivo de Optuna para optimizar los parámetros en tres ventanas de tiempo distintas
 def objetivo(trial):
     # Parámetros para la primera ventana de tiempo (desde el inicio hasta el minuto 650)
@@ -75,11 +79,11 @@ def objetivo(trial):
     for dia in range(1):
         print(f"Simulando el día {dia + 1}...")
 
-        with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo II/scen_points_sample.pkl', 'rb') as f:
             puntos_simulaciones = pickle.load(f)
-        with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo II/scen_arrivals_sample.pkl', 'rb') as f:
             llegadas_simulaciones = pickle.load(f)
-        with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo II/scen_indicador_sample.pkl', 'rb') as f:
             indicadores_simulaciones = pickle.load(f)
         # Cargar los datos específicos del día
         points = puntos_simulaciones[dia]
@@ -113,12 +117,15 @@ def objetivo(trial):
     
     return promedio_recuperado
 
+def registrar_beneficio(study, trial):
+    beneficios_incumbentes.append(study.best_value)
+
 
 
 
 # Crear un estudio de Optuna para maximizar el beneficio
 estudio = optuna.create_study(direction="maximize")
-estudio.optimize(objetivo, n_trials=1000)  # n_trials es el número de iteraciones
+estudio.optimize(objetivo, n_trials=1000, callbacks=[registrar_beneficio])  # n_trials es el número de iteraciones
 
 # Obtener los mejores parámetros y su valor de beneficio total
 mejores_parametros = estudio.best_params
@@ -142,3 +149,11 @@ print()
 print("Mejores beneficio")
 print(mejor_beneficio)
 
+plt.figure(figsize=(10, 6))
+plt.plot(beneficios_incumbentes, label="Beneficio Incumbente")
+plt.title("Progreso del Beneficio Incumbente por Iteración")
+plt.xlabel("Iteración")
+plt.ylabel("Beneficio Incumbente")
+plt.legend()
+plt.grid()
+plt.show()
