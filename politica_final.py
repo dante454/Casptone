@@ -4,6 +4,13 @@ import pickle
 import matplotlib.pyplot as plt
 from funciones_caso_base import *
 
+
+def calcular_beneficio_maximo(simulacion):
+        """Calcula el beneficio máximo posible hasta el minuto actual."""
+        return sum(
+            1 if pedido.indicador == 1 else 2 
+            for pedido in (simulacion.pedidos_entregados + simulacion.pedidos_disponibles + simulacion.pedidos_no_disponibles)
+        )
 #Separa los pedidos en la areas asignadas por los parametros
 def separar_y_seleccionar_area(pedidos_disponibles):
     # Separar los pedidos según su área
@@ -21,6 +28,7 @@ def separar_y_seleccionar_area(pedidos_disponibles):
     else:
         return pedidos_area3
 
+
 #Maneja el flujo de desiciones desde que se toma la decision de salir a repartir
 def flujo_ruteo(camion, simulacion, parametros):
     # 1. Obtener los pedidos disponibles
@@ -33,12 +41,13 @@ def flujo_ruteo(camion, simulacion, parametros):
     # 4. Generar la ruta según los pedidos en el área con más pedidos
     ruta = generar_ruta(depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, tiempo_limite=195)
 
-    # Si no hay puntos en la ruta, no hacer nada
+    #  5. Si no hay puntos en la ruta, no hacer nada
     if len(ruta) <= 2:
         return
 
-    # Reiniciar el contador de pickups dinámicos para la nueva ruta
+    # 6. Reiniciar el contador de pickups dinámicos para la nueva ruta
     camion.pickups_actuales = 0
+    camion.pickups_evaluados = False
 
     # 7. Actualizar los pedidos entregados
     actualizar_estado_simulacion(simulacion, ruta)
@@ -141,8 +150,22 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
         simulacion.avanzar_minuto(parametros)
         simulacion.registrar_estado(camiones)
     
-    print(len(simulacion.pedidos_entregados))
+
+    beneficio_total = calcular_beneficio(simulacion)
+    distancia_total = calcular_distancia_total(camiones)
+    beneficio_total_disponible = calcular_beneficio_maximo(simulacion)
+    tiempos_respuesta = [pedido.tiempo_entrega for pedido in simulacion.pedidos_entregados if pedido.tiempo_entrega is not None]
+    tiempo_respuesta_promedio = sum(tiempos_respuesta) / len(tiempos_respuesta) if tiempos_respuesta else 0
+
+    cantidad_pickups = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 1)
+    cantidad_deliveries = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 0)
+    #print(len(simulacion.pedidos_entregados))
     print("Simulación finalizada.")
+    print(f"Simulación finalizada. Beneficio total: {beneficio_total}/{beneficio_total_disponible}")
+    print(f"Distancia total recorrida: {distancia_total} metros")
+    print(f"Tiempo promedio de respuesta: {tiempo_respuesta_promedio:.2f} minutos")
+    print(f"Cantidad de pickups realizados: {cantidad_pickups}")
+    print(f"Cantidad de deliveries realizados: {cantidad_deliveries}")
 
 # Función que evalúa los criterios de salida de los camiones
 def evaluar_salida(camion, simulacion, parametros):
@@ -163,10 +186,12 @@ def evaluar_salida(camion, simulacion, parametros):
     return valor_ponderado >= parametros["umbral_salida"]
 
 
-#Aqui se encuentran todas las funciones relacionadas a la incorporacion del pick up
+# Aqui se encuentran todas las funciones relacionadas a la incorporacion del pick up
+# evaluar incorporacion de pick up y pick up nuevos disponibles.
+
 def evaluar_incorporacion_pickup(camion, parametros, simulacion):
     # Límite de pickups dinámicos permitidos por ruta
-    max_pickups_dinamicos = 5
+    max_pickups_dinamicos = 20
 
     # Verificar si ya se alcanzó el límite de pickups dinámicos
     if camion.pickups_actuales >= max_pickups_dinamicos:
@@ -205,9 +230,10 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
         # Si por alguna razón el índice está fuera de rango, no hacemos nada
         return
 
+
 def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
     # Límite de pickups dinámicos permitidos por ruta
-    max_pickups_dinamicos = 5
+    max_pickups_dinamicos = 20
 
     # Verificar si se ha alcanzado el límite
     if camion.pickups_actuales >= max_pickups_dinamicos:
@@ -272,6 +298,8 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
     else:
         print(f"No hay nuevas solicitudes de pick-up disponibles en el minuto {simulacion.minuto_actual}.")
         return camion.rutas[-1]  # Devolver la ruta actual sin cambios
+
+
 
 def cheapest_insertion_adaptacion(
     minuto_actual, parametros, camion, current_index, pedidos_validos, ruta_actual, todos_los_pedidos, tiempo_limite=195):
@@ -508,11 +536,11 @@ parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia
 
 
 # Cargar los datos de la simulación desde archivos pickle
-with open("Instancia Tipo IV/scen_points_sample.pkl", 'rb') as f:
+with open("Instancia Tipo I/scen_points_sample.pkl", 'rb') as f:
     points = pickle.load(f)[3]  # Seleccionar la primera simulación para este ejemplo
-with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
+with open('Instancia Tipo I/scen_arrivals_sample.pkl', 'rb') as f:
     llegadas = pickle.load(f)[3]
-with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
+with open('Instancia Tipo I/scen_indicador_sample.pkl', 'rb') as f:
     indicadores = pickle.load(f)[3]
 
 arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]

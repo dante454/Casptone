@@ -122,7 +122,7 @@ def analisis_sensibilidad(iteraciones_optuna, pickups, deliveries):
 
     mejores_parametros = funcion_opti_optuna(points, arribos_por_minuto, indicadores, iteraciones_optuna, deliveries, pickups)
 
-    for i in range(100):
+    for i in range(25):
         points = puntos_simulaciones[i]
         llegadas = llegadas_simulaciones[i]
         indicadores = indicadores_simulaciones[i]
@@ -176,7 +176,7 @@ promedios_deliveries = []
 etiquetas = []
 
 for pickups, deliveries in combinaciones:
-    promedio_pickups, promedio_deliveries = analisis_sensibilidad(iteraciones_optuna=100, pickups=pickups, deliveries=deliveries)
+    promedio_pickups, promedio_deliveries = analisis_sensibilidad(iteraciones_optuna=3, pickups=pickups, deliveries=deliveries)
     # Aquí ya son valores flotantes, no listas
     promedios_pickups.append(promedio_pickups)  # Agrega el promedio directamente
     promedios_deliveries.append(promedio_deliveries)
