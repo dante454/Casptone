@@ -190,8 +190,11 @@ def evaluar_salida(camion, simulacion, parametros):
 # evaluar incorporacion de pick up y pick up nuevos disponibles.
 
 def evaluar_incorporacion_pickup(camion, parametros, simulacion):
-    # Límite de pickups dinámicos permitidos por ruta
-    max_pickups_dinamicos = 20
+    # Límite de pickups dinámicos permitidos por ruta dependiendo de instancia
+    if instancia_archivo == 'Instancia Tipo I':
+        max_pickups_dinamicos = 20
+    else:
+        max_pickups_dinamicos = 5
 
     # Verificar si ya se alcanzó el límite de pickups dinámicos
     if camion.pickups_actuales >= max_pickups_dinamicos:
@@ -232,8 +235,11 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
 
 
 def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
-    # Límite de pickups dinámicos permitidos por ruta
-    max_pickups_dinamicos = 20
+    # Límite de pickups dinámicos permitidos por ruta dependiendo de instancia
+    if instancia_archivo == 'Instancia Tipo I':
+        max_pickups_dinamicos = 20
+    else:
+        max_pickups_dinamicos = 5
 
     # Verificar si se ha alcanzado el límite
     if camion.pickups_actuales >= max_pickups_dinamicos:
@@ -534,14 +540,16 @@ parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia
 parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
 
+instancia_archivo = 'Instancia Tipo IV'
 
 # Cargar los datos de la simulación desde archivos pickle
-with open("Instancia Tipo I/scen_points_sample.pkl", 'rb') as f:
-    points = pickle.load(f)[3]  # Seleccionar la primera simulación para este ejemplo
-with open('Instancia Tipo I/scen_arrivals_sample.pkl', 'rb') as f:
+with open(f'{instancia_archivo}/scen_points_sample.pkl', 'rb') as f:
+    points = pickle.load(f)[3]
+with open(f'{instancia_archivo}/scen_arrivals_sample.pkl', 'rb') as f:
     llegadas = pickle.load(f)[3]
-with open('Instancia Tipo I/scen_indicador_sample.pkl', 'rb') as f:
+with open(f'{instancia_archivo}/scen_indicador_sample.pkl', 'rb') as f:
     indicadores = pickle.load(f)[3]
+
 
 arribos_por_minuto = procesar_tiempos([llegadas], division_minutos=60)[0]
 simulacion = EstadoSimulacion(minuto_inicial=520, puntos=points, indicadores=indicadores, arribos_por_minuto=arribos_por_minuto)
@@ -559,5 +567,5 @@ registrar_tiempos_delivery(simulacion)
 
 
 # Llamar a la función para crear el GIF
-#crear_gif_con_movimiento_camiones(simulacion)
+crear_gif_con_movimiento_camiones(simulacion)
 #generar_mapa_calor_rutas(simulacion)

@@ -46,14 +46,14 @@ parametros_ventana_3 = {'min_pedidos_salida': 20, 'porcentaje_reduccion_distanci
 
 # parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
-
+instancia_archivo = 'Instancia Tipo I'
 
 # Cargar los datos de la simulación para los 100 días
-with open('Instancia Tipo II/scen_points_sample.pkl', 'rb') as f:
+with open(f'{instancia_archivo}/scen_points_sample.pkl', 'rb') as f:
     puntos_simulaciones = pickle.load(f)
-with open('Instancia Tipo II/scen_arrivals_sample.pkl', 'rb') as f:
+with open(f'{instancia_archivo}/scen_arrivals_sample.pkl', 'rb') as f:
     llegadas_simulaciones = pickle.load(f)
-with open('Instancia Tipo II/scen_indicador_sample.pkl', 'rb') as f:
+with open(f'{instancia_archivo}/scen_indicador_sample.pkl', 'rb') as f:
     indicadores_simulaciones = pickle.load(f)
 
 # Inicializar listas para almacenar los resultados de los KPIs

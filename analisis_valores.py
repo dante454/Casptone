@@ -108,11 +108,11 @@ def analisis_sensibilidad(iteraciones_optuna, pickups, deliveries):
     resultados_pickups_iteraciones = []
     resultados_deliveries_iteraciones = []
 
-    with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
+    with open('Instancia Tipo I/scen_points_sample.pkl', 'rb') as f:
         puntos_simulaciones = pickle.load(f)
-    with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
+    with open('Instancia Tipo I/scen_arrivals_sample.pkl', 'rb') as f:
         llegadas_simulaciones = pickle.load(f)
-    with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
+    with open('Instancia Tipo I/scen_indicador_sample.pkl', 'rb') as f:
         indicadores_simulaciones = pickle.load(f)
 
     points = puntos_simulaciones[5]
@@ -122,7 +122,7 @@ def analisis_sensibilidad(iteraciones_optuna, pickups, deliveries):
 
     mejores_parametros = funcion_opti_optuna(points, arribos_por_minuto, indicadores, iteraciones_optuna, deliveries, pickups)
 
-    for i in range(25):
+    for i in range(100):
         points = puntos_simulaciones[i]
         llegadas = llegadas_simulaciones[i]
         indicadores = indicadores_simulaciones[i]
@@ -165,10 +165,11 @@ def analisis_sensibilidad(iteraciones_optuna, pickups, deliveries):
 
 # Graficar promedios para diferentes combinaciones
 combinaciones = [
-    (1, 2),
     (2, 1),
     (1, 3),
     (3, 1),
+    (1, 5),
+    (5, 1),
 ]
 
 promedios_pickups = []
@@ -176,7 +177,7 @@ promedios_deliveries = []
 etiquetas = []
 
 for pickups, deliveries in combinaciones:
-    promedio_pickups, promedio_deliveries = analisis_sensibilidad(iteraciones_optuna=3, pickups=pickups, deliveries=deliveries)
+    promedio_pickups, promedio_deliveries = analisis_sensibilidad(iteraciones_optuna=100, pickups=pickups, deliveries=deliveries)
     # Aquí ya son valores flotantes, no listas
     promedios_pickups.append(promedio_pickups)  # Agrega el promedio directamente
     promedios_deliveries.append(promedio_deliveries)
