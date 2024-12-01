@@ -101,8 +101,6 @@ class EstadoSimulacion:
                     self.pedidos_tercerizados.append(pedido)
                     print("se terceriza el deliverie")
 
-
-
 #Clase que modela los pedidos y toda la informacion que contienen
 class Pedido:
     def __init__(self, coordenadas, indicador, minuto_llegada, parametros):

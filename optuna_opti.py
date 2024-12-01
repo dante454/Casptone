@@ -79,11 +79,11 @@ def objetivo(trial):
     for dia in range(5):
         print(f"Simulando el día {dia + 1}...")
 
-        with open('Instancia Tipo I/scen_points_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
             puntos_simulaciones = pickle.load(f)
-        with open('Instancia Tipo I/scen_arrivals_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
             llegadas_simulaciones = pickle.load(f)
-        with open('Instancia Tipo I/scen_indicador_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
             indicadores_simulaciones = pickle.load(f)
         # Cargar los datos específicos del día
         points = puntos_simulaciones[dia]

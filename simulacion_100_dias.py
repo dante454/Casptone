@@ -13,7 +13,7 @@ from politica_final import simular_minuto_a_minuto
 
 
 
-instancia_archivo = 'Instancia Tipo I'
+instancia_archivo = 'Instancia Tipo IV'
 
 if instancia_archivo == 'Instancia Tipo I':
     parametros_ventana_1 = p.parametros_ventana_1_instancia_1
@@ -81,7 +81,7 @@ for dia in range(100):
 
     #si se esta simulando para el caso base ejecutar las siguentes lineas: SINO, COMENTARLAS
     #x_minutos = 60  
-    s#imular_minuto_a_minuto(simulacion, camiones, x_minutos)
+    #simular_minuto_a_minuto(simulacion, camiones, x_minutos)
 
     # Recopilar los KPIs del día
     beneficio_total = calcular_beneficio(simulacion)
