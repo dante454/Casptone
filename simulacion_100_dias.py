@@ -10,6 +10,7 @@
 import pickle
 import pandas as pd
 from funciones_caso_base import *
+import parametros as p
 
 #    -------------------  ¡¡¡¡ IMPORTANTE !!!!!! --------------------
 
@@ -20,23 +21,12 @@ from politica_final import simular_minuto_a_minuto
 #from caso_base_2 import simular_minuto_a_minuto
 
 
-# Parámetros de las ventanas de tiempo (ajustados previamente en Optuna)
 
+#parametros_ventana_1 =  {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 55, 'max_puntos_eliminados': 19, 'x_minutos': 60, 'limite_area1': 139, 'limite_area2': 270, 'peso_min_pedidos': 1.270769165494037, 'peso_ventana_tiempo': 0.5334298758833237, 'umbral_salida': 1.142787259922978, 'tiempo_minimo_pickup': 33, 'max_aumento_distancia': 20, 'tiempo_necesario_pick_up': 647, 'tiempo_restante_max': 97, 'max_aumento_distancia_delivery': 232, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
-# parametros_ventana_1 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 47, 'max_puntos_eliminados': 16, 'x_minutos': 18, 'limite_area1': 147, 'limite_area2': 215, 'peso_min_pedidos': 1.6525938339343251, 'peso_ventana_tiempo': 1.8947957184968578, 'umbral_salida': 1.126101447963525, 'tiempo_minimo_pickup': 31, 'max_aumento_distancia': 16, 'tiempo_necesario_pick_up': 661, 'tiempo_restante_max': 106, 'max_aumento_distancia_delivery': 1048, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
+#parametros_ventana_2 =  {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 43, 'max_puntos_eliminados': 11, 'x_minutos': 3, 'limite_area1': 126, 'limite_area2': 200, 'peso_min_pedidos': 1.9875097075448465, 'peso_ventana_tiempo': 1.9411077324851984, 'umbral_salida': 1.2940403662686877, 'tiempo_minimo_pickup': 36, 'max_aumento_distancia': 7, 'tiempo_necesario_pick_up': 1104, 'tiempo_restante_max': 132, 'max_aumento_distancia_delivery': 38, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
-# parametros_ventana_2 =  {'min_pedidos_salida': 3, 'porcentaje_reduccion_distancia': 54, 'max_puntos_eliminados': 15, 'x_minutos': 9, 'limite_area1': 140, 'limite_area2': 243, 'peso_min_pedidos': 1.8017927848294588, 'peso_ventana_tiempo': 1.325020645146538, 'umbral_salida': 1.488642659103274, 'tiempo_minimo_pickup': 37, 'max_aumento_distancia': 14, 'tiempo_necesario_pick_up': 975, 'tiempo_restante_max': 181, 'max_aumento_distancia_delivery': 1351, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-# parametros_ventana_3 = {'min_pedidos_salida': 12, 'porcentaje_reduccion_distancia': 42, 'max_puntos_eliminados': 17, 'x_minutos': 25, 'limite_area1': 110, 'limite_area2': 231, 'peso_min_pedidos': 1.0883231580184491, 'peso_ventana_tiempo': 1.0133168647668476, 'umbral_salida': 1.9840669226875491, 'tiempo_minimo_pickup': 34, 'max_aumento_distancia': 12, 'tiempo_necesario_pick_up': 1438, 'tiempo_restante_max': 68, 'max_aumento_distancia_delivery': 1355, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-
-#instancia 2
-
-parametros_ventana_1 =  {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 55, 'max_puntos_eliminados': 19, 'x_minutos': 60, 'limite_area1': 139, 'limite_area2': 270, 'peso_min_pedidos': 1.270769165494037, 'peso_ventana_tiempo': 0.5334298758833237, 'umbral_salida': 1.142787259922978, 'tiempo_minimo_pickup': 33, 'max_aumento_distancia': 20, 'tiempo_necesario_pick_up': 647, 'tiempo_restante_max': 97, 'max_aumento_distancia_delivery': 232, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-parametros_ventana_2 =  {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 43, 'max_puntos_eliminados': 11, 'x_minutos': 3, 'limite_area1': 126, 'limite_area2': 200, 'peso_min_pedidos': 1.9875097075448465, 'peso_ventana_tiempo': 1.9411077324851984, 'umbral_salida': 1.2940403662686877, 'tiempo_minimo_pickup': 36, 'max_aumento_distancia': 7, 'tiempo_necesario_pick_up': 1104, 'tiempo_restante_max': 132, 'max_aumento_distancia_delivery': 38, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-parametros_ventana_3 = {'min_pedidos_salida': 20, 'porcentaje_reduccion_distancia': 68, 'max_puntos_eliminados': 18, 'x_minutos': 14, 'limite_area1': 91, 'limite_area2': 265, 'peso_min_pedidos': 1.1700431872055927, 'peso_ventana_tiempo': 1.9398927740769498, 'umbral_salida': 1.0454057612407521, 'tiempo_minimo_pickup': 23, 'max_aumento_distancia': 10, 'tiempo_necesario_pick_up': 814, 'tiempo_restante_max': 111, 'max_aumento_distancia_delivery': 1224, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
+#parametros_ventana_3 = {'min_pedidos_salida': 20, 'porcentaje_reduccion_distancia': 68, 'max_puntos_eliminados': 18, 'x_minutos': 14, 'limite_area1': 91, 'limite_area2': 265, 'peso_min_pedidos': 1.1700431872055927, 'peso_ventana_tiempo': 1.9398927740769498, 'umbral_salida': 1.0454057612407521, 'tiempo_minimo_pickup': 23, 'max_aumento_distancia': 10, 'tiempo_necesario_pick_up': 814, 'tiempo_restante_max': 111, 'max_aumento_distancia_delivery': 1224, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
 
 #instancia 4
@@ -46,7 +36,26 @@ parametros_ventana_3 = {'min_pedidos_salida': 20, 'porcentaje_reduccion_distanci
 
 # parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
 
-instancia_archivo = 'Instancia Tipo I'
+instancia_archivo = 'Instancia Tipo IV'
+
+if instancia_archivo == 'Instancia Tipo I':
+    parametros_ventana_1 = p.parametros_ventana_1_instancia_1
+    parametros_ventana_2 = p.parametros_ventana_2_instancia_1
+    parametros_ventana_3 = p.parametros_ventana_3_instancia_1
+elif instancia_archivo == 'Instancia Tipo II':
+    parametros_ventana_1 = p.parametros_ventana_1_instancia_2
+    parametros_ventana_2 = p.parametros_ventana_2_instancia_2
+    parametros_ventana_3 = p.parametros_ventana_3_instancia_2
+elif instancia_archivo == 'Instancia Tipo III':
+    parametros_ventana_1 = p.parametros_ventana_1_instancia_3
+    parametros_ventana_2 = p.parametros_ventana_2_instancia_3
+    parametros_ventana_3 = p.parametros_ventana_3_instancia_3
+elif instancia_archivo == 'Instancia Tipo IV':
+    parametros_ventana_1 = p.parametros_ventana_1_instancia_4
+    parametros_ventana_2 = p.parametros_ventana_2_instancia_4
+    parametros_ventana_3 = p.parametros_ventana_3_instancia_4
+
+
 
 # Cargar los datos de la simulación para los 100 días
 with open(f'{instancia_archivo}/scen_points_sample.pkl', 'rb') as f:

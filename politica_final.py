@@ -191,14 +191,10 @@ def evaluar_salida(camion, simulacion, parametros):
 
 def evaluar_incorporacion_pickup(camion, parametros, simulacion):
     # Límite de pickups dinámicos permitidos por ruta dependiendo de instancia
-    if instancia_archivo == 'Instancia Tipo I':
-        max_pickups_dinamicos = 20
-    else:
-        max_pickups_dinamicos = 5
 
     # Verificar si ya se alcanzó el límite de pickups dinámicos
-    if camion.pickups_actuales >= max_pickups_dinamicos:
-        print(f"Camión {camion.id}: Límite de {max_pickups_dinamicos} pickups dinámicos alcanzado para esta ruta.")
+    if camion.pickups_actuales >= parametros['maximo_incorporacion_pick_up']:
+        print(f"Camión {camion.id}: Límite de {parametros['maximo_incorporacion_pick_up']} pickups dinámicos alcanzado para esta ruta.")
         return
 
     # Verificar si ya se evaluaron los pick-ups para esta ruta
@@ -320,8 +316,6 @@ def cheapest_insertion_adaptacion(
         [10000, 10000],
         service_time=3
     )
-    current_time = arrival_times_up_to_current[-1] + 3  # Añadir tiempo de servicio en el punto actual
-
 
     # Lista de pedidos ya en la ruta actual (desde current_index + 1 hasta el final)
     ruta_actual_aux = ruta_actual[current_index + 1:]
@@ -416,6 +410,13 @@ def cheapest_insertion_adaptacion(
                         for idx, arrival_time in zip(ruta_temporal, arrival_times_temp)
                     ):
                         continue  # Rechazar la inserción si afecta algún delivery
+
+                # Rechazo para "Pick-ups"
+                if (pedidos_totales[point].indicador == 1 and
+                    increase > parametros['max_aumento_distancia_en_ruta'] * (minuto_actual / parametros['tiempo_necesario_pick_up_en_ruta']) and
+                    minuto_actual < parametros['tiempo_necesario_pick_up_en_ruta']):
+                    print('pick up rechazado por no ser conveniente')
+                    continue
 
 
                 # Elegir este punto si el incremento es el menor
@@ -533,11 +534,11 @@ def verificar_pedidos_repetidos(pedidos_entregados):
 
 
 # Parámetros de la simulación (ajustables por Optuna)
-parametros_ventana_1 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
+parametros_ventana_1 = {'min_pedidos_salida': 8, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016, 'tiempo_necesario_pick_up_en_ruta': 1300, 'max_aumento_distancia_en_ruta': 0, 'maximo_incorporacion_pick_up': 10}
 
-parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
+parametros_ventana_2 = {'min_pedidos_salida': 5, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000, 'maximo_incorporacion_pick_up': 0}
 
-parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
+parametros_ventana_3 = {'min_pedidos_salida': 1, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556, 'tiempo_necesario_pick_up_en_ruta': 1300, 'max_aumento_distancia_en_ruta': 0, 'maximo_incorporacion_pick_up': 10}
 
 
 instancia_archivo = 'Instancia Tipo IV'
@@ -563,9 +564,9 @@ camiones = [
 
 simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
-registrar_tiempos_delivery(simulacion)
+#registrar_tiempos_delivery(simulacion)
 
 
 # Llamar a la función para crear el GIF
-crear_gif_con_movimiento_camiones(simulacion)
+#crear_gif_con_movimiento_camiones(simulacion)
 #generar_mapa_calor_rutas(simulacion)

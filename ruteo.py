@@ -185,7 +185,7 @@ def generar_ruta(depot, camion, minuto_actual, pedidos_disponibles, parametros, 
     return ruta
 
 #Cheapest insertion que se usa para el caso base
-def cheapest_insertion_caso_base(points, depot, camion, minuto_actual, pedidos_disponibles, tiempo_limite=180):
+def cheapest_insertion_caso_base(points, depot, camion, minuto_actual, pedidos_disponibles, tiempo_limite=195):
     """
     Algoritmo de Cheapest Insertion para el caso base, sin ordenamiento de prioridad
     y sin rechazo de "Pick-ups" y "Deliveries".

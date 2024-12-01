@@ -54,7 +54,7 @@ class EstadoSimulacion:
         """Calcula el beneficio máximo posible hasta el minuto actual."""
         return sum(
             1 if pedido.indicador == 1 else 2 
-            for pedido in (self.pedidos_entregados + self.pedidos_disponibles + self.pedidos_no_disponibles)
+            for pedido in (self.pedidos_entregados + self.pedidos_disponibles + self.pedidos_no_disponibles + self.pedidos_tercerizados)
         )
 
     def calcular_porcentaje_beneficio(self, beneficio_acumulado):
@@ -91,13 +91,15 @@ class EstadoSimulacion:
         self.registro_minuto_a_minuto.append(estado)
 
     def tercerizar_pedido(self, depot, velocidad_camion):
-        for pedido in self.pedidos_disponibles[:]:
-            tiempo_tercerizacion = calcular_tiempo_ruta([depot, pedido.coordenadas], velocidad_camion) + 5
-            tiempo_vida_restante =  195 - (self.minuto_actual - pedido.minuto_llegada) - tiempo_tercerizacion
-            
-            if tiempo_vida_restante <= 0:
-                self.pedidos_disponibles.remove(pedido)
-                self.pedidos_tercerizados.append(pedido)
+        for pedido in self.pedidos_disponibles:
+            if pedido.indicador == 0:
+                tiempo_tercerizacion = calcular_tiempo_ruta([depot, pedido.coordenadas], velocidad_camion) + 5
+                tiempo_vida_restante =  195 - (self.minuto_actual - pedido.minuto_llegada) - tiempo_tercerizacion
+                
+                if tiempo_vida_restante <= 0:
+                    self.pedidos_disponibles.remove(pedido)
+                    self.pedidos_tercerizados.append(pedido)
+                    print("se terceriza el deliverie")
 
 
 
@@ -242,7 +244,7 @@ def crear_gif_con_movimiento_camiones(simulacion, archivo_gif="simulacion_movimi
                 if pedido["entregado"]:
                     ax.plot(x, y, 'go')  # Verde para entregados
                 elif pedido["estado"] == "Disponible":
-                    if estado["minuto"] - pedido["minuto_llegada"] > 180:  # Delivery vencido
+                    if estado["minuto"] - pedido["minuto_llegada"] > 195:  # Delivery vencido
                         ax.plot(x, y, 'mo')  # Magenta para vencidos
                     else:
                         ax.plot(x, y, 'bo')  # Azul para disponibles
