@@ -3,7 +3,7 @@
 
 
 import optuna
-from funciones_caso_base import EstadoSimulacion, Camion, procesar_tiempos, calcular_tiempo_ruta
+from funciones_complementarias import EstadoSimulacion, Camion, procesar_tiempos, calcular_tiempo_ruta
 from politica_final import simular_minuto_a_minuto, points, indicadores, arribos_por_minuto
 import matplotlib.pyplot as plt
 import pickle
@@ -79,11 +79,11 @@ def objetivo(trial):
     for dia in range(5):
         print(f"Simulando el día {dia + 1}...")
 
-        with open('Instancia Tipo IV/scen_points_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo I/scen_points_sample.pkl', 'rb') as f:
             puntos_simulaciones = pickle.load(f)
-        with open('Instancia Tipo IV/scen_arrivals_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo I/scen_arrivals_sample.pkl', 'rb') as f:
             llegadas_simulaciones = pickle.load(f)
-        with open('Instancia Tipo IV/scen_indicador_sample.pkl', 'rb') as f:
+        with open('Instancia Tipo I/scen_indicador_sample.pkl', 'rb') as f:
             indicadores_simulaciones = pickle.load(f)
         # Cargar los datos específicos del día
         points = puntos_simulaciones[dia]
@@ -125,7 +125,7 @@ def registrar_beneficio(study, trial):
 
 # Crear un estudio de Optuna para maximizar el beneficio
 estudio = optuna.create_study(direction="maximize")
-estudio.optimize(objetivo, n_trials=50, callbacks=[registrar_beneficio])  # n_trials es el número de iteraciones
+estudio.optimize(objetivo, n_trials=200, callbacks=[registrar_beneficio])  # n_trials es el número de iteraciones
 
 # Obtener los mejores parámetros y su valor de beneficio total
 mejores_parametros = estudio.best_params

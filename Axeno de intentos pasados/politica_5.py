@@ -5,7 +5,7 @@ from ruteo import generar_ruta
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
-from funciones_caso_base import *
+from funciones_complementarias import *
 import matplotlib.animation as animation
 
 

@@ -1,6 +1,6 @@
 
 import optuna
-from funciones_caso_base import EstadoSimulacion, Camion
+from funciones_complementarias import EstadoSimulacion, Camion
 from politica_final import simular_minuto_a_minuto
 import pandas as pd
 

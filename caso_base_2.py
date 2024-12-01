@@ -2,7 +2,7 @@ import numpy as np
 from ruteo import cheapest_insertion_caso_base
 import pickle
 import matplotlib.pyplot as plt
-from funciones_caso_base import *
+from funciones_complementarias import *
 
 
 
@@ -110,9 +110,9 @@ def simular_minuto_a_minuto(simulacion, camiones, x_minutos):
             beneficio_acumulado = simulacion.calcular_beneficio_acumulado()
             porcentaje_beneficio = simulacion.calcular_porcentaje_beneficio(beneficio_acumulado)
             simulacion.beneficio_por_intervalo.append((minuto, porcentaje_beneficio))
-
+        parametros = {'limite_area1': 120, 'limite_area2': 240}
         # Avanza el minuto en la simulación
-        simulacion.avanzar_minuto()
+        simulacion.avanzar_minuto(parametros)
         simulacion.registrar_estado(camiones)
     
     print(len(simulacion.pedidos_entregados))

@@ -3,7 +3,7 @@ from ruteo import generar_ruta
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
-from funciones_caso_base import procesar_tiempos, calcular_distancia, calcular_tiempo_ruta, calcular_distancia_ruta, calcular_distancia_total, calcular_beneficio
+from funciones_complementarias import procesar_tiempos, calcular_distancia, calcular_tiempo_ruta, calcular_distancia_ruta, calcular_distancia_total, calcular_beneficio
 
 class EstadoSimulacion:
     def __init__(self, minuto_inicial, puntos, indicadores, arribos_por_minuto):

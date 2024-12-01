@@ -1,15 +1,6 @@
-
-#    -------------------  ¡¡¡¡ IMPORTANTE !!!!!! --------------------
-#SI SE QUIERE SIMULAR LA POLITICA FINAL:
-#Para correr este archivo es necesario comentar la linea 166, 167 y 318 del archivo politica_final
-
-#SI SE QUIERE CORRER CASO BASE:
-##Para correr este archivo es necesario comentar la linea 154, 155 y 258 del archivo politica_final
-
-
 import pickle
 import pandas as pd
-from funciones_caso_base import *
+from funciones_complementarias import *
 import parametros as p
 
 #    -------------------  ¡¡¡¡ IMPORTANTE !!!!!! --------------------
@@ -22,21 +13,7 @@ from politica_final import simular_minuto_a_minuto
 
 
 
-#parametros_ventana_1 =  {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 55, 'max_puntos_eliminados': 19, 'x_minutos': 60, 'limite_area1': 139, 'limite_area2': 270, 'peso_min_pedidos': 1.270769165494037, 'peso_ventana_tiempo': 0.5334298758833237, 'umbral_salida': 1.142787259922978, 'tiempo_minimo_pickup': 33, 'max_aumento_distancia': 20, 'tiempo_necesario_pick_up': 647, 'tiempo_restante_max': 97, 'max_aumento_distancia_delivery': 232, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-#parametros_ventana_2 =  {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 43, 'max_puntos_eliminados': 11, 'x_minutos': 3, 'limite_area1': 126, 'limite_area2': 200, 'peso_min_pedidos': 1.9875097075448465, 'peso_ventana_tiempo': 1.9411077324851984, 'umbral_salida': 1.2940403662686877, 'tiempo_minimo_pickup': 36, 'max_aumento_distancia': 7, 'tiempo_necesario_pick_up': 1104, 'tiempo_restante_max': 132, 'max_aumento_distancia_delivery': 38, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-#parametros_ventana_3 = {'min_pedidos_salida': 20, 'porcentaje_reduccion_distancia': 68, 'max_puntos_eliminados': 18, 'x_minutos': 14, 'limite_area1': 91, 'limite_area2': 265, 'peso_min_pedidos': 1.1700431872055927, 'peso_ventana_tiempo': 1.9398927740769498, 'umbral_salida': 1.0454057612407521, 'tiempo_minimo_pickup': 23, 'max_aumento_distancia': 10, 'tiempo_necesario_pick_up': 814, 'tiempo_restante_max': 111, 'max_aumento_distancia_delivery': 1224, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-
-#instancia 4
-# parametros_ventana_1 = {'min_pedidos_salida': 8, 'porcentaje_reduccion_distancia': 69, 'max_puntos_eliminados': 18, 'x_minutos': 36, 'limite_area1': 130, 'limite_area2': 263, 'peso_min_pedidos': 0.8539602391541146, 'peso_ventana_tiempo': 1.4716156151156219, 'umbral_salida': 1.2899961479169701, 'tiempo_minimo_pickup': 22, 'max_aumento_distancia': 13, 'tiempo_necesario_pick_up': 1338, 'tiempo_restante_max': 190, 'max_aumento_distancia_delivery': 1016, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-# parametros_ventana_2 = {'min_pedidos_salida': 5, 'porcentaje_reduccion_distancia': 34, 'max_puntos_eliminados': 9, 'x_minutos': 16, 'limite_area1': 148, 'limite_area2': 184, 'peso_min_pedidos': 1.6641134475979422, 'peso_ventana_tiempo': 1.588743965974094, 'umbral_salida': 1.4367916479682685, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 8, 'tiempo_necesario_pick_up': 836, 'tiempo_restante_max': 11, 'max_aumento_distancia_delivery': 28, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-# parametros_ventana_3 = {'min_pedidos_salida': 1, 'porcentaje_reduccion_distancia': 33, 'max_puntos_eliminados': 18, 'x_minutos': 15, 'limite_area1': 122, 'limite_area2': 225, 'peso_min_pedidos': 0.5389202543851898, 'peso_ventana_tiempo': 1.369371705453108, 'umbral_salida': 1.4795958635544573, 'tiempo_minimo_pickup': 43, 'max_aumento_distancia': 19, 'tiempo_necesario_pick_up': 1211, 'tiempo_restante_max': 96, 'max_aumento_distancia_delivery': 556, 'tiempo_necesario_pick_up_en_ruta': 10, 'max_aumento_distancia_en_ruta': 13000}
-
-instancia_archivo = 'Instancia Tipo IV'
+instancia_archivo = 'Instancia Tipo I'
 
 if instancia_archivo == 'Instancia Tipo I':
     parametros_ventana_1 = p.parametros_ventana_1_instancia_1
@@ -98,15 +75,13 @@ for dia in range(100):
         Camion(id=3, tiempo_inicial=0)
     ]
 
-    # Ejecutar la simulación de un día
-
     #    ------------------- ¡¡¡¡ IMPORTANTE !!!!!! --------------------
     #SI es para la solucion inicial ejecutar la siguente linea
     simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3)
 
     #si se esta simulando para el caso base ejecutar las siguentes lineas: SINO, COMENTARLAS
-    x_minutos = 60  
-    #simular_minuto_a_minuto(simulacion, camiones, x_minutos)
+    #x_minutos = 60  
+    s#imular_minuto_a_minuto(simulacion, camiones, x_minutos)
 
     # Recopilar los KPIs del día
     beneficio_total = calcular_beneficio(simulacion)

@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 import pickle
 from  politica_final import Camion
-from ruteo_analisis_valores import *
-from  funciones_caso_base import procesar_tiempos
+from analisis_valores_ruteo import *
+from  funciones_complementarias import procesar_tiempos
 import optuna
 
 def calcular_porcentaje_beneficio(simulacion, beneficio_acumulado, valor_deliv, valor_pick):

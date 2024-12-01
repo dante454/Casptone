@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 from ruteo import generar_ruta
-from funciones_caso_base import *
+from funciones_complementarias import *
 
 class EstadoSimulacion:
     def __init__(self, minuto_inicial, puntos, indicadores, arribos_por_minuto):
