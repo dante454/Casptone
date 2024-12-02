@@ -290,7 +290,7 @@ def listas_identicas(lista1, lista2):
 
 
 
-instancia_archivo = 'Instancia Tipo I'
+instancia_archivo = 'Instancia Tipo IV'
 
 if instancia_archivo == 'Instancia Tipo I':
     parametros_ventana_1 = p.parametros_ventana_1_instancia_1
@@ -334,4 +334,3 @@ simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametros_v
 
 # Llamar a la función para crear el GIF
 #crear_gif_con_movimiento_camiones(simulacion)
-#generar_mapa_calor_rutas(simulacion)

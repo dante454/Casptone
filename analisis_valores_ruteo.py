@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from funciones_complementarias import *
-from ruteo import manhattan_distance, calculate_arrival_times, verificar_llegada_a_tiempo
+from ruteo import manhattan_distance, calculate_arrival_times
 from politica_final import *
 
 # Función para calcular el beneficio máximo posible
@@ -143,7 +143,7 @@ def simular_minuto_a_minuto2(simulacion, camiones, parametros_ventana_1, paramet
 
         for camion in camiones:
             if evaluar_salida2(camion, simulacion, parametros, valor_pickup, valor_delivery):
-                flujo_ruteo2(camion, simulacion, parametros, valor_pickup, valor_delivery)  # Pasar los valores
+                flujo_ruteo2(camion, simulacion, parametros, valor_pickup, valor_delivery)  
 
         if minuto % 30 == 0:
             beneficio_acumulado = simulacion.calcular_beneficio_acumulado(valor_delivery, valor_pickup)
