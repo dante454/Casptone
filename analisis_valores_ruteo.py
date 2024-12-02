@@ -4,11 +4,12 @@ from funciones_complementarias import *
 from ruteo import manhattan_distance, calculate_arrival_times
 from politica_final import *
 
-# Función para calcular el beneficio máximo posible
+# Función para calcular el beneficio máximo posible dependiendo de los valores de pick-up y delivery
 def calcular_beneficio_maximo(simulacion, valor_deliv, valor_pick):
     return sum(valor_pick if pedido.indicador == 1 else valor_deliv  
                for pedido in (simulacion.pedidos_entregados + simulacion.pedidos_disponibles + simulacion.pedidos_no_disponibles))
 
+# Función para calcular el beneficio total dependiendo de los valores de pick-up y delivery
 def calcular_beneficio2(simulacion, valor_delivery=2, valor_pickup=1):
     beneficio = 0
     for pedido in simulacion.pedidos_entregados:
@@ -18,15 +19,20 @@ def calcular_beneficio2(simulacion, valor_delivery=2, valor_pickup=1):
             beneficio += valor_delivery
     return beneficio
 
+##### TODAS LAS FUNCIONES DE ESTE PUNTO PARA ABAJO SON FUNCIONES YA EXISTENTES SACADAS DE DISTINTOS ARCHIVOS #####
+##### SACADAS DE DISTINTOS ARCHIVOS COMO RUTEO.PY, POLITICAL_FINAL.PY Y FUNCIONES_COMPLEMENTARIAS.PY #############
+##### MODIFICADAS PARA ACEPTAR LOS VALORES DE PICK-UP Y DELIVERY Y RUTEAR EN FUNCIÓN DE ELLOS  ###################
 
+# Prioridad de los pedidos, dependiendo del valor de beneficio
 def calcular_prioridad2(pedido, minuto_actual, valor_pickup, valor_delivery):
     if pedido.indicador == 0:  # Delivery
         tiempo_restante = 180 - (minuto_actual - pedido.minuto_llegada)
         return tiempo_restante * valor_delivery
     else:  # Pick-up
         return 180 * valor_pickup
-    
 
+
+# Adaptación de la cheapest insertion de politica_final.py, pero considerando los valores de pick-up y delivery
 def cheapest_insertion2(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, valor_pickup, valor_delivery, tiempo_limite=195):
     while unvisited:
         min_increase = float('inf')
@@ -90,7 +96,7 @@ def cheapest_insertion2(tiempo_total, unvisited, route, points, pedidos_validos,
     return [depot] + [pedidos_validos[idx].coordenadas for idx in route] + [depot]
 
 
-    
+# Adaptación de generar_ruta de ruteo.py, considerando los valores de pick-up y delivery
 def generar_ruta2(points, depot, camion, minuto_actual, pedidos_disponibles, parametros, valor_pickup, valor_delivery, tiempo_limite=195):
     # Ordenar pedidos por prioridad calculada
     pedidos_disponibles = sorted(
@@ -124,7 +130,7 @@ def generar_ruta2(points, depot, camion, minuto_actual, pedidos_disponibles, par
     return cheapest_insertion2(tiempo_total, unvisited, route, points, pedidos_validos, depot, camion, minuto_actual, pedidos_disponibles, parametros, valor_pickup, valor_delivery, tiempo_limite)
 
     
-
+# Adaptación de la función de political_final.py con los valores de delivery y pickup
 def simular_minuto_a_minuto2(simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3, valor_pickup, valor_delivery):
     for minuto in range(520, 1020):
         simulacion.minuto_actual = minuto
@@ -174,30 +180,31 @@ def flujo_ruteo2(camion, simulacion, parametros, valor_pickup, valor_delivery):
     # 1. Obtener los pedidos disponibles
     pedidos_disponibles = simulacion.pedidos_disponibles
 
-    # 3. Separar los pedidos según su área y seleccionar el área con más pedidos
+    # 2. Separar los pedidos según su área y seleccionar el área con más pedidos
     pedidos_a_rutear = separar_y_seleccionar_area(pedidos_disponibles)
 
     depot = [10000, 10000]  # Depósito
     points = simulacion.puntos  # Asegúrate de que los puntos estén disponibles en la simulación
 
-    # 4. Generar la ruta según los pedidos en el área con más pedidos
+    # 3. Generar la ruta según los pedidos en el área con más pedidos
     ruta = generar_ruta2(points, depot, camion, simulacion.minuto_actual, pedidos_a_rutear, parametros, valor_pickup, valor_delivery, tiempo_limite=195)
 
-    # Si no hay puntos en la ruta, no hacer nada
+    # 4. Si no hay puntos en la ruta, no hacer nada
     if len(ruta) <= 2:
         return
 
-    # Reiniciar el contador de pickups dinámicos para la nueva ruta
+    # 5. Reiniciar el contador de pickups dinámicos para la nueva ruta
     camion.pickups_actuales = 0
     camion.pickups_evaluados = False
 
-    # 7. Actualizar los pedidos entregados
+    # 6. Actualizar los pedidos entregados
     actualizar_estado_simulacion(simulacion, ruta)
 
-    # 8. Actualizar el camión con la nueva ruta
+    # 7. Actualizar el camión con la nueva ruta
     tiempo_ruta = calcular_tiempo_ruta(ruta, camion.velocidad)
     camion.asignar_ruta(ruta, tiempo_ruta, simulacion.minuto_actual)
-    # 9. Devolver la ruta y el tiempo de la ruta
+
+    # 8. Devolver la ruta y el tiempo de la ruta
     return ruta, tiempo_ruta
 
 

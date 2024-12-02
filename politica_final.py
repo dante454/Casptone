@@ -194,7 +194,7 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
 
     # Verificar si ya se alcanzó el límite de pickups dinámicos
     if camion.pickups_actuales >= parametros['maximo_incorporacion_pick_up']:
-        print(f"Camión {camion.id}: Límite de {parametros['maximo_incorporacion_pick_up']} pickups dinámicos alcanzado para esta ruta.")
+        print(f"Camión {camion.id}: Límite de {parametros['maximo_incorporacion_pick_up']} pickups dinámicos alcanzado.")
         return
 
     # Verificar si ya se evaluaron los pick-ups para esta ruta
@@ -220,7 +220,7 @@ def evaluar_incorporacion_pickup(camion, parametros, simulacion):
             if nueva_ruta:
                 nuevos_pickups = len(nueva_ruta) - len(camion.rutas[-1])
                 camion.pickups_actuales += nuevos_pickups
-                print(f"Camión {camion.id}: Se añadieron {nuevos_pickups} pickups dinámicos. Total actuales: {camion.pickups_actuales}")
+                print(f"Camión {camion.id}: Se añadieron pickups dinámicos.")
 
             # Marcar que los pick-ups ya fueron evaluados para esta ruta
             camion.pickups_evaluados = True
@@ -264,7 +264,7 @@ def pick_up_nuevos_disponible(camion, parametros, simulacion, current_index):
 
             # Incrementar el conteo de pickups actuales del camión
             camion.pickups_actuales += len(nuevos_pickups)
-            print(f"Camión {camion.id}: Se agregaron {len(nuevos_pickups)} pickups. Total pickups dinámicos: {camion.pickups_actuales}")
+            print(f"Camión {camion.id}: Se agregaron pickups.")
 
             # Calcular el nuevo tiempo restante
             _, tiempo_total_nueva_ruta = calculate_arrival_times_adapted(

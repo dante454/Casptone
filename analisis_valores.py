@@ -6,19 +6,6 @@ from analisis_valores_ruteo import *
 from  funciones_complementarias import procesar_tiempos
 import parametros as p
 
-def calcular_porcentaje_beneficio(simulacion, beneficio_acumulado, valor_deliv, valor_pick):
-        """Calcula el porcentaje del beneficio respecto al máximo beneficio disponible."""
-        beneficio_maximo = calcular_beneficio_maximo(simulacion, valor_deliv, valor_pick)
-        if beneficio_maximo == 0:
-            return 0  # Evita división por cero
-        return (beneficio_acumulado / beneficio_maximo) * 100
-
-
-# Función para calcular el beneficio acumulado
-def calcular_beneficio_acumulado(simulacion, valor_deliv, valor_pick):
-    return sum(valor_pick if pedido.indicador == 1 else valor_deliv 
-               for pedido in simulacion.pedidos_entregados)
-
 
 
 # Análisis de sensibilidad
@@ -57,7 +44,7 @@ def analisis_sensibilidad(pickups, deliveries):
         parametros_ventana_2 = p.parametros_ventana_2_instancia_4
         parametros_ventana_3 = p.parametros_ventana_3_instancia_4
 
-    for i in range(100):
+    for i in range(100):   # Analizamos todos los días de la instancia en cuestión
         points = puntos_simulaciones[i]
         llegadas = llegadas_simulaciones[i]
         indicadores = indicadores_simulaciones[i]
@@ -67,7 +54,7 @@ def analisis_sensibilidad(pickups, deliveries):
         camiones = [Camion(id=j+1, tiempo_inicial=0) for j in range(3)]
         simular_minuto_a_minuto2(
             simulacion, camiones, parametros_ventana_1, parametros_ventana_2, parametros_ventana_3,
-            pickups, deliveries  # Pasa los valores a las funciones internas
+            pickups, deliveries
         )
 
         total_pickups = sum(1 for pedido in simulacion.pedidos_entregados if pedido.indicador == 1)
@@ -113,7 +100,6 @@ etiquetas = []
 
 for pickups, deliveries in combinaciones:
     promedio_pickups, promedio_deliveries = analisis_sensibilidad( pickups=pickups, deliveries=deliveries)
-    # Aquí ya son valores flotantes, no listas
     promedios_pickups.append(promedio_pickups)  # Agrega el promedio directamente
     promedios_deliveries.append(promedio_deliveries)
     etiquetas.append(f"Pickup={pickups}, Delivery={deliveries}")
