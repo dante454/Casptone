@@ -13,7 +13,7 @@ from politica_final import simular_minuto_a_minuto
 
 
 
-instancia_archivo = 'Instancia Tipo IV'
+instancia_archivo = 'Instancia Tipo I'
 
 if instancia_archivo == 'Instancia Tipo I':
     parametros_ventana_1 = p.parametros_ventana_1_instancia_1

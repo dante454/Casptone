@@ -123,7 +123,7 @@ def simular_minuto_a_minuto(simulacion, camiones, parametros_ventana_1, parametr
             porcentaje_beneficio = simulacion.calcular_porcentaje_beneficio(beneficio_acumulado)
             simulacion.beneficio_por_intervalo.append((minuto, porcentaje_beneficio))
 
-            pedidos_totales = simulacion.pedidos_disponibles + simulacion.pedidos_entregados + simulacion.pedidos_no_disponibles
+            pedidos_totales = simulacion.pedidos_disponibles + simulacion.pedidos_entregados + simulacion.pedidos_no_disponibles + simulacion.pedidos_tercerizados
 
             total_deliveries = sum(1 for pedido in pedidos_totales if pedido.indicador == 0)
             total_pickups = sum(1 for pedido in pedidos_totales if pedido.indicador == 1)
