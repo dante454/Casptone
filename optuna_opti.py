@@ -1,5 +1,5 @@
 #    ------------------- ¡¡¡¡ IMPORTANTE !!!!!!--------------------
-#Para correr este archivo es necesario comentar la linea 166, 167 y 318 del archivo politica_final
+#Para correr este archivo es necesario comentar la linea 336 del archivo politica_final
 
 
 import optuna

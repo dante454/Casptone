@@ -27,7 +27,7 @@ def inicializar_simulacion(camion_count, velocidad, indx):
     return simulacion, camiones
 
 
-instancia_archivo = 'Instancia Tipo IV'
+instancia_archivo = 'Instancia Tipo III'
 
 if instancia_archivo == 'Instancia Tipo I':
     parametros_ventana_1 = p.parametros_ventana_1_instancia_1
